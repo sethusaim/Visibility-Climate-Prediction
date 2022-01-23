@@ -1,8 +1,8 @@
-from sklearn.ensemble import RandomForestClassifier
+from sklearn.ensemble import RandomForestRegressor
 from utils.logger import App_Logger
 from utils.model_utils import get_best_params_for_model, get_best_score_for_model
 from utils.read_params import read_params
-from xgboost import XGBClassifier
+from xgboost import XGBRegressor
 
 
 class Model_Finder:
@@ -28,13 +28,13 @@ class Model_Finder:
 
         self.log_writer = App_Logger()
 
-        self.rf_model = RandomForestClassifier()
+        self.rf_model = RandomForestRegressor()
 
-        self.xgb_model = XGBClassifier(objective="binary:logistic")
+        self.xgb_model = XGBRegressor(objective="binary:logistic")
 
-    def get_best_params_for_random_forest(self, train_x, train_y):
+    def get_best_model_for_random_forest(self, train_x, train_y):
         """
-        Method Name :   get_best_params_for_random_forest
+        Method Name :   get_best_model_for_random_forest
         Description :   get the parameters for Random Forest Algorithm which give the best accuracy.
                         Use Hyper Parameter Tuning.
         Output      :   The model with the best parameters
@@ -44,7 +44,7 @@ class Model_Finder:
         Version     :   1.0
         Revisions   :   None
         """
-        method_name = self.get_best_params_for_random_forest.__name__
+        method_name = self.get_best_model_for_random_forest.__name__
 
         self.log_writer.start_log(
             key="start",
@@ -78,7 +78,7 @@ class Model_Finder:
                 log_message=f"{self.rf_model.__class__.__name__} model best params are {self.rf_best_params}",
             )
 
-            rf_model = RandomForestClassifier(
+            rf_model = RandomForestRegressor(
                 n_estimators=self.n_estimators,
                 criterion=self.criterion,
                 max_depth=self.max_depth,
@@ -163,7 +163,7 @@ class Model_Finder:
                 log_message=f"{self.rf_model.__class__.__name__} model best params are {self.rf_best_params}",
             )
 
-            xgb_model = XGBClassifier(
+            xgb_model = XGBRegressor(
                 learning_rate=self.learning_rate,
                 max_depth=self.max_depth,
                 n_estimators=self.n_estimators,
@@ -234,7 +234,7 @@ class Model_Finder:
                 collection_name=self.collection_name,
             )
 
-            rf_model = self.get_best_params_for_random_forest(train_x, train_y)
+            rf_model = self.get_best_model_for_random_forest(train_x, train_y)
 
             rf_model_score = get_best_score_for_model(
                 model=rf_model,
