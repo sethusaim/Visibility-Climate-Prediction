@@ -1,6 +1,6 @@
-from src.dataTransform.data_transformation_train import dataTransform
-from src.dataTypeValid.data_type_valid_train import dBOperation
-from src.raw_data_validation.train_data_validation import Raw_Data_validation
+from climate.data_transform.data_transformation_train import data_transform_train
+from climate.data_type_valid.data_type_valid_train import db_operation_train
+from climate.raw_data_validation.train_data_validation import raw_train_data_validation
 from utils.logger import App_Logger
 from utils.read_params import read_params
 
@@ -9,11 +9,11 @@ class train_validation:
     def __init__(self, path):
         self.config = read_params()
 
-        self.raw_data = Raw_Data_validation(path)
+        self.raw_data = raw_train_data_validation(path)
 
-        self.dataTransform = dataTransform()
+        self.dataTransform = data_transform_train()
 
-        self.dBOperation = dBOperation()
+        self.dBOperation = db_operation_train()
 
         self.db_name = self.config["db_log"]["db_train_log"]
 

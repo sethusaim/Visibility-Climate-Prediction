@@ -121,7 +121,7 @@ model_params:
       - 14
 
 mlflow_config:
-  experiment_name : wafer-test-demo
+  experiment_name : climate-test-demo
   remote_server_uri : http://0.0.0.0:5000
   run_name : mlops
   serialization_format : cloudpickle

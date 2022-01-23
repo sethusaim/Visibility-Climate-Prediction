@@ -7,9 +7,9 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import Response
 from fastapi.templating import Jinja2Templates
 
-from climate.model.load_production_model import LoadProdModel
-from climate.model.predictionFromModel import prediction
-from climate.model.trainingModel import trainModel
+from climate.model.load_production_model import load_prod_model
+from climate.model.prediction_from_model import prediction
+from climate.model.training_model import train_model
 from climate.validation_insertion.prediction_validation_insertion import pred_validation
 from climate.validation_insertion.train_validation_insertion import train_validation
 from utils.read_params import read_params
@@ -44,70 +44,45 @@ async def index(request: Request):
 @app.get("/train")
 async def trainRouteClient():
     try:
-        path = config["data_source"]["train_data_source"]
+        raw_data_train_bucket_name = config["s3_bucket"]["climate_raw_data_bucket"]
 
-        train_valObj = train_validation(path)
+        train_valObj = train_validation(raw_data_train_bucket_name)
 
         train_valObj.train_validation()
 
-        trainModelObj = trainModel()
+        trainModelObj = train_model()
 
-        num_clusters = trainModelObj.trainingModel()
+        num_clusters = trainModelObj.training_model()
 
-        loadProdModelObj = LoadProdModel(num_clusters)
+        loadProdModelObj = load_prod_model(num_clusters)
 
         loadProdModelObj.load_production_model()
 
+        return Response("Training successfull!!")
+
     except Exception as e:
-        return "Error Occurred! %s" % e
-
-    return "Training successfull!!"
+        return Response(f"Error Occurred! {e}")
 
 
-@app.post("/predict")
-async def predictRouteClient(request: Request):
+@app.get("/predict")
+async def predictRouteClient():
     try:
-        if request.json is not None:
-            path = request.json["filepath"]
+        raw_data_pred_bucket_name = config["s3_bucket"]["climate_raw_data_bucket"]
 
-            pred_val = pred_validation(path)
+        pred_val = pred_validation(raw_data_pred_bucket_name)
 
-            pred_val.prediction_validation()
+        pred_val.prediction_validation()
 
-            pred = prediction(path)
+        pred = prediction()
 
-            path, json_predictions = pred.predictionFromModel()
+        bucket, filename, json_predictions = pred.predict_from_model()
 
-            return Response(
-                "Prediction File created at !!!"
-                + str(path)
-                + "and few of the predictions are "
-                + str(json.loads(json_predictions))
-            )
-
-        elif request.form is not None:
-            path = request.form["filepath"]
-
-            pred_val = pred_validation(path)
-
-            pred_val.prediction_validation()
-
-            pred = prediction(path)
-
-            path, json_predictions = pred.predictionFromModel()
-
-            return Response(
-                "Prediction File created at "
-                + str(path)
-                + " and few of the predictions are "
-                + str(json.loads(json_predictions))
-            )
-
-        else:
-            print("Nothing Matched")
+        return Response(
+            f"Prediction file created in {bucket} bucket with filename as {filename}, and few of the predictions are {str(json.loads(json_predictions))}"
+        )
 
     except Exception as e:
-        return Response("Error Occurred! %s" % e)
+        return Response(f"Error Occurred! {e}")
 
 
 if __name__ == "__main__":

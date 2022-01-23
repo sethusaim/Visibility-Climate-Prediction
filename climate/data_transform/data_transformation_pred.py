@@ -5,8 +5,7 @@ from utils.logger import App_Logger
 from utils.main_utils import read_params
 
 
-class dataTransformPredict:
-
+class data_transform_pred:
     """
     Written By  :   iNeuron Intelligence
     Version     :   1.0

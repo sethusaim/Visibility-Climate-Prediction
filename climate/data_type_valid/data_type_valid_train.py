@@ -4,12 +4,12 @@ import shutil
 import sqlite3 as sql_db
 
 from utils.logger import App_Logger
-from utils.main_utils import read_params
+from utils.read_params import read_params
 
 
-class dBOperation:
+class db_operation_train:
     """
-    Description :   This class shall be used for handling  all the SQL operations
+    Description :   This class shall be used for handling all the SQL operations
     Written by  :   iNeuron Intelligence
     Version     :   1.0
     Revisions   :   None
@@ -18,47 +18,48 @@ class dBOperation:
     def __init__(self):
         self.config = read_params()
 
-        self.path = self.config["database_dir"]["pred_database"]
+        self.path = self.config["database_dir"]["train_database"]
 
-        self.badFilePath = self.config["data"]["bad"]["pred"]
+        self.badFilePath = self.config["data"]["bad"]["train"]
 
-        self.goodFilePath = self.config["data"]["good"]["pred"]
+        self.goodFilePath = self.config["data"]["good"]["train"]
 
         self.logger = App_Logger()
 
-        self.db_name = self.config["db_log"]["db_pred_log"]
+        self.db_name = self.config["db_log"]["db_train_log"]
 
-        self.pred_db_conn_log = self.config["pred_db_log"]["db_conn"]
+        self.train_db_conn_log = self.config["train_db_log"]["db_conn_log"]
 
-        self.pred_db_create_log = self.config["pred_db_log"]["db_create"]
+        self.train_db_create_log = self.config["train_db_log"]["db_create_log"]
 
-        self.export_csv_file_log = self.config["pred_db_log"]["export_csv"]
+        self.train_db_insert_log = self.config["train_db_log"]["db_insert_log"]
 
-        self.pred_db_insert_log = self.config["pred_db_log"]["db_insert"]
+        self.train_export_csv_log = self.config["train_db_log"]["export_csv_log"]
 
     def dataBaseConnection(self, DatabaseName):
         """
-        Method Name :   databaseConnection
+        Method Name :   dataBaseConnection
         Description :   This method creates the database with the given name and if Database already exists
-                        then opens the connection to the DB
+                        then opens the connection to the db
         Written by  :   iNeuron Intelligence
+        Output      :   Connection to the db
         Version     :   1.1
         Revisions   :   modified code based on params.yaml file
         """
         try:
-            conn = sql_db.connect(self.path + DatabaseName + ".db")
+            conn = sql_db.connect(self.path + "/" + DatabaseName + ".db")
 
             self.logger.log(
-                db_name=self.pred_db_conn_log,
-                collection_name=self.pred_db_conn_log,
+                db_name=self.db_name,
+                collection_name=self.train_db_conn_log,
                 log_message="Opened %s database successfully" % DatabaseName,
             )
 
-        except ConnectionError as e:
+        except ConnectionError:
             self.logger.log(
                 db_name=self.db_name,
-                collection_name=self.pred_db_conn_log,
-                log_message="Error while connecting to database: %s" % e,
+                collection_name=self.train_db_conn_log,
+                log_message="Error while connecting to database: %s" % ConnectionError,
             )
 
             raise ConnectionError
@@ -77,51 +78,71 @@ class dBOperation:
         try:
             conn = self.dataBaseConnection(DatabaseName)
 
-            conn.execute("DROP TABLE IF EXISTS Good_Raw_Data;")
+            c = conn.cursor()
 
-            for key in column_names.keys():
-                type = column_names[key]
-
-                try:
-                    conn.execute(
-                        'ALTER TABLE Good_Raw_Data ADD COLUMN "{column_name}" {dataType}'.format(
-                            column_name=key, dataType=type
-                        )
-                    )
-
-                except:
-                    conn.execute(
-                        "CREATE TABLE  Good_Raw_Data ({column_name} {dataType})".format(
-                            column_name=key, dataType=type
-                        )
-                    )
-
-            conn.close()
-
-            self.logger.log(
-                db_name=self.db_name,
-                collection_name=self.pred_db_create_log,
-                log_message="Tables created successfully!!",
+            c.execute(
+                "SELECT count(name)  FROM sqlite_master WHERE type = 'table' AND name = 'Good_Raw_Data'"
             )
 
-            self.logger.log(
-                db_name=self.db_name,
-                collection_name=self.pred_db_conn_log,
-                log_message="Closed %s database successfully" % DatabaseName,
-            )
+            if c.fetchone()[0] == 1:
+                conn.close()
+
+                self.logger.log(
+                    db_name=self.db_name,
+                    collection_name=self.train_db_create_log,
+                    log_message="Tables created successfully!!",
+                )
+
+                self.logger.log(
+                    db_name=self.db_name,
+                    collection_name=self.train_db_conn_log,
+                    log_message="Closed %s database successfully" % DatabaseName,
+                )
+
+            else:
+                for key in column_names.keys():
+                    type = column_names[key]
+
+                    try:
+                        conn.execute(
+                            'ALTER TABLE Good_Raw_Data ADD COLUMN "{column_name}" {dataType}'.format(
+                                column_name=key, dataType=type
+                            )
+                        )
+
+                    except:
+                        conn.execute(
+                            "CREATE TABLE  Good_Raw_Data ({column_name} {dataType})".format(
+                                column_name=key, dataType=type
+                            )
+                        )
+
+                conn.close()
+
+                self.logger.log(
+                    db_name=self.db_name,
+                    collection_name=self.train_db_create_log,
+                    log_message="Tables created successfully!!",
+                )
+
+                self.logger.log(
+                    db_name=self.db_name,
+                    collection_name=self.train_db_conn_log,
+                    log_message="Closed %s database successfully" % DatabaseName,
+                )
 
         except Exception as e:
             self.logger.log(
                 db_name=self.db_name,
-                collection_name=self.pred_db_create_log,
-                log_message=f"Exception occured in Class : dBOperation, Method : createTableDb, Error : {str(e)} ",
+                collection_name=self.train_db_create_log,
+                log_message=f"Exception occured in Class : dBOperation, Method : createTableDb, Error : {str(e)}",
             )
 
             conn.close()
 
             self.logger.log(
                 db_name=self.db_name,
-                collection_name=self.pred_db_conn_log,
+                collection_name=self.train_db_conn_log,
                 log_message="Closed %s database successfully" % DatabaseName,
             )
 
@@ -133,10 +154,10 @@ class dBOperation:
     def insertIntoTableGoodData(self, Database):
         """
         Method Name :   insertIntoTableGoodData
-        Description :   This method inserts the good data files from the good_raw folder into the
-                        above created table
+        Description :   This method inserts the Good data files from the Good_raw folder into the above created
+                        table
         Written by  :   iNeuron Intelligence
-        Version     :   1.1
+        Versions    :   1.1
         Revisions   :   modified code based on params.yaml file
         """
         conn = self.dataBaseConnection(Database)
@@ -149,9 +170,9 @@ class dBOperation:
 
         for file in onlyfiles:
             try:
-                good_file = os.path.join(goodFilePath, file)
+                tmp_file = os.path.join(goodFilePath, file)
 
-                with open(file=good_file, mode="r") as f:
+                with open(file=tmp_file, mode="r") as f:
                     next(f)
 
                     reader = csv.reader(f, delimiter="\n")
@@ -167,7 +188,7 @@ class dBOperation:
 
                                 self.logger.log(
                                     db_name=self.db_name,
-                                    collection_name=self.pred_db_insert_log,
+                                    collection_name=self.train_db_insert_log,
                                     log_message=" %s: File loaded successfully!!"
                                     % file,
                                 )
@@ -182,35 +203,34 @@ class dBOperation:
 
                 self.logger.log(
                     db_name=self.db_name,
-                    collection_name=self.pred_db_insert_log,
-                    log_message=f"Exception occured Class : dBOperation. \
+                    collection_name=self.train_db_insert_log,
+                    log_message=f"Exception occured in Class : dbOperation. \
                         Method : insertIntoTableGoodData, Error : {str(e)}",
                 )
 
-                shutil.move(goodFilePath + "/" + file, badFilePath)
+                tmp_file = os.path.join(goodFilePath, file)
+
+                shutil.move(tmp_file, badFilePath)
 
                 self.logger.log(
                     db_name=self.db_name,
-                    collection_name=self.pred_db_insert_log,
+                    collection_name=self.train_db_insert_log,
                     log_message="File Moved Successfully %s" % file,
                 )
 
                 conn.close()
-
-                raise e
 
         conn.close()
 
     def selectingDatafromtableintocsv(self, Database):
         """
         Method Name :   selectingDatafromtableintocsv
-        Description :   This methods exports the data in GoodData table as a csv file in a given location
-                        above created
+        Description :   This method exports the data in GoodData table as a csv file in a given location
         Written by  :   iNeuron Intelligence
         Version     :   1.1
         Revisions   :   modified code based on params.yaml file
         """
-        self.fileFromDb = self.config["db_file_path"]["pred_db_path"]
+        self.fileFromDb = self.config["db_file_path"]["train_db_path"]
 
         self.fileName = self.config["export_csv_file_name"]
 
@@ -231,7 +251,7 @@ class dBOperation:
                 os.makedirs(self.fileFromDb)
 
             csvFile = csv.writer(
-                open(self.fileFromDb + self.fileName, "w", newline=""),
+                open(self.fileFromDb + "/" + self.fileName, "w", newline=""),
                 delimiter=",",
                 lineterminator="\r\n",
                 quoting=csv.QUOTE_ALL,
@@ -244,20 +264,18 @@ class dBOperation:
 
             self.logger.log(
                 db_name=self.db_name,
-                collection_name=self.export_csv_file_log,
+                collection_name=self.train_export_csv_log,
                 log_message="File exported successfully!!!",
             )
 
         except Exception as e:
             self.logger.log(
                 db_name=self.db_name,
-                collection_name=self.export_csv_file_log,
-                log_message=f"Exception occured in Class : dBOperation. \
-                    Method : selectingDatafromtableintocsv, Error : {str(e)} ",
+                collection_name=self.train_export_csv_log,
+                log_message=f"Exception occured in Class : dbOperation, Method : selectingDatafromtableintocsv, Error : {str(e)}",
             )
 
             raise Exception(
-                "Exception occured in Class : dBOperation. \
-                    Method : selectingDatafromtableintocsv, Error : ",
+                "Exception occured in Class : dbOperation, Method : selectingDatafromtableintocsv, Error : ",
                 str(e),
             )

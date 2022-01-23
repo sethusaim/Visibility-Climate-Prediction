@@ -416,7 +416,7 @@ class Prediction_Data_validation:
                         as given in the schema file. If not same file is not suitable for processing and
                         thus is moved to baw raw data folder. If the column number matches, the file is
                         kept in good raw data folder for processing. This csv file is missing the first
-                        column name,this function changes the missing name to "Wafer".
+                        column name,this function changes the missing name to "climate".
         On failure  :   Raise Exception
         Written by  :   iNeuron Intelligence
         Version     :   1.1
@@ -433,7 +433,7 @@ class Prediction_Data_validation:
                 csv = pd.read_csv(self.config["data"]["good"]["pred"] + file)
 
                 if csv.shape[1] == NumberofColumns:
-                    csv.rename(columns={"Unnamed: 0": "Wafer"}, inplace=True)
+                    csv.rename(columns={"Unnamed: 0": "climate"}, inplace=True)
 
                     csv.to_csv(
                         self.config["data"]["good"]["pred"] + file,
@@ -552,7 +552,7 @@ class Prediction_Data_validation:
                         break
 
                 if count == 0:
-                    csv.rename(columns={"Unnamed: 0": "Wafer"}, inplace=True)
+                    csv.rename(columns={"Unnamed: 0": "climate"}, inplace=True)
 
                     csv.to_csv(
                         self.config["data"]["good"]["pred"] + file,

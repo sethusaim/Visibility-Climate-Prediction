@@ -5,7 +5,7 @@ from utils.logger import App_Logger
 from utils.read_params import read_params
 
 
-class dataTransform:
+class data_transform_train:
     """
     Written By  :   iNeuron Intelligence
     Version     :   1.0

@@ -1,70 +1,151 @@
+import json
+import os
+
+import pandas as pd
 from pymongo import MongoClient
 from utils.read_params import read_params
 
 
-class MongoDBOperation:
+class MongoDB_Operation:
+    """
+    Description :   This method is used for all mongodb operations
+
+    Version     :   1.2
+    Revisions   :   moved to setup to cloud
+    """
+
     def __init__(self):
         self.config = read_params()
 
-        self.DB_URL = self.config["mongodb_url"]
+        self.class_name = self.__class__.__name__
 
-    def getDatabaseClientObject(self):
+        self.DB_URL = os.environ["MONGODB_URL"]
+
+    def get_client(self):
+        """
+        Method Name :   get_client
+        Description :   This method is used for getting the client from MongoDB
+
+        Version     :   1.2
+        Revisions   :   moved setup to cloud
+        """
+        method_name = self.get_client.__name__
+
         try:
             self.client = MongoClient(self.DB_URL)
 
             return self.client
 
         except Exception as e:
-            raise Exception(
-                "Exception occured in Class: MongoDBOperation, \
-                    Method:getDataBaseClientObject, Error:Failed to create database connection object-->"
-                + str(e)
-            )
+            exception_msg = f"Exception occured in Class : {self.class_name}, Method : {method_name}, Error : {str(e)}"
 
-    def createDatabase(self, client, db_name):
+            raise Exception(exception_msg)
+
+    def create_db(self, client, db_name):
+        """
+        Method Name :   create_db
+        Description :   This method is creating a database in MongoDB
+
+        Version     :   1.2
+        Revisions   :   moved setup to cloud
+        """
+        method_name = self.create_db.__name__
+
         try:
             return client[db_name]
 
         except Exception as e:
-            raise Exception(
-                "Exception occured in MongoDBOperation, method : createDatabase error : "
-                + str(e)
-            )
+            exception_msg = f"Exception occured in Class : {self.class_name}, Method : {method_name}, Error : {str(e)}"
 
-    def createCollectionInDatabase(self, database, collection_name):
+            raise Exception(exception_msg)
+
+    def create_collection(self, database, collection_name):
+        """
+        Method Name :   create_collection
+        Description :   This method is used for creating a collection in created database
+
+        Version     :   1.2
+        Revisions   :   moved setup to cloud
+        """
+        method_name = self.create_collection.__name__
+
         try:
             return database[collection_name]
 
         except Exception as e:
-            raise Exception(
-                "Exception occured in class : MongoDBOperation method : createCollectionInDatabase error : "
-                + str(e)
-            )
+            exception_msg = f"Exception occured in Class : {self.class_name}, Method : {method_name}, Error : {str(e)}"
 
-    def getCollection(self, collection_name, database):
+            raise Exception(exception_msg)
+
+    def get_collection(self, collection_name, database):
+        """
+        Method Name :   get_collection
+        Description :   This method is used for getting collection from a database
+
+        Version     :   1.2
+        Revisions   :   moved setup to cloud
+        """
+        method_name = self.get_collection.__name__
+
         try:
-            collection = self.createCollectionInDatabase(database, collection_name)
+            collection = self.create_collection(database, collection_name)
 
             return collection
 
         except Exception as e:
-            raise Exception(
-                "Exception occured in class: MongoDBOperation method:getCollection error:Failed to find collection"
-                + str(e)
-            )
+            exception_msg = f"Exception occured in Class : {self.class_name}, Method : {method_name}, Error : {str(e)}"
 
-    def isRecordPresent(self, db_name, collection_name, record):
+            raise Exception(exception_msg)
+
+    def convert_collection_to_dataframe(self, db_name, collection_name):
+        """
+        Method Name :   convert_collection_to_dataframe
+        Description :   This method is used for converting the selected collection to dataframe
+
+        Version     :   1.2
+        Revisions   :   moved setup to cloud
+        """
+        method_name = self.convert_collection_to_dataframe.__name__
 
         try:
-            client = self.getDatabaseClientObject()
+            client = self.get_client()
 
-            database = self.createDatabase(client, db_name)
+            database = self.create_db(client, db_name)
 
-            collection = self.getCollection(collection_name, database)
+            collection = database.get_collection(name=collection_name)
 
-            recordfound = collection.find(record)
+            df = pd.DataFrame(list(collection.find()))
 
-            if recordfound.count() > 0:
+            if "_id" in df.columns.to_list():
+                df = df.drop(columns=["_id"], axis=1)
+
+            return df
+
+        except Exception as e:
+            exception_msg = f"Exception occured in Class : {self.class_name}, Method : {method_name}, Error : {str(e)}"
+
+            raise Exception(exception_msg)
+
+    def is_record_present(self, db_name, collection_name, record):
+        """
+        Method Name :   is_record_present
+        Description :   This method is used for checking whether the record exists or not
+
+        Version     :   1.2
+        Revisions   :   moved setup to cloud
+        """
+        method_name = self.is_record_present.__name__
+
+        try:
+            client = self.get_client()
+
+            database = self.create_db(client, db_name)
+
+            collection = self.get_collection(collection_name, database)
+
+            record_count = collection.count_documents(filter=record)
+
+            if record_count > 0:
                 client.close()
 
                 return True
@@ -77,44 +158,79 @@ class MongoDBOperation:
         except Exception as e:
             client.close()
 
-            raise Exception(
-                f"Exception occured in class: MongoDBOperation, Method:isRecordPresent, Error: {str(e)}"
-            )
+            exception_msg = f"Exception occured in Class : {self.class_name}, Method : {method_name}, Error : {str(e)}"
 
-    def createOneRecord(self, collection, data):
+            raise Exception(exception_msg)
+
+    def create_one_record(self, collection, data):
+        """
+        Method Name :   create_one_record
+        Description :   This method is used for creating a single record in the collection
+
+        Version     :   1.2
+        Revisions   :   moved setup to cloud
+        """
+        method_name = self.create_one_record.__name__
+
         try:
             collection.insert_one(data)
 
             return 1
 
         except Exception as e:
-            raise Exception(
-                "Exception occured in class: MongoDBOperation method:createOneRecord error:Failed to insert record "
-                + str(e)
-            )
+            exception_msg = f"Exception occured in Class : {self.class_name}, Method : {method_name}, Error : {str(e)}"
 
-    def insertRecordInCollection(self, db_name, collection_name, record):
+            raise Exception(exception_msg)
+
+    def insert_dataframe_as_record(self, data_frame, db_name, collection_name):
+        """
+        Method Name :   insert_dataframe_as_record
+        Description :   This method is used for inserting the dataframe in collection as record
+
+        Version     :   1.2
+        Revisions   :   moved setup to cloud
+        """
+        method_name = self.insert_dataframe_as_record.__name__
+
         try:
-            no_of_row_inserted = 0
+            records = json.loads(data_frame.T.to_json()).values()
 
-            client = self.getDatabaseClientObject()
+            client = self.get_client()
 
-            database = self.createDatabase(client, db_name)
+            database = self.create_db(client, db_name)
 
-            collection = self.getCollection(collection_name, database)
+            collection = database.get_collection(collection_name)
 
-            if not self.isRecordPresent(db_name, collection_name, record):
-                no_of_row_inserted = self.createOneRecord(
-                    collection=collection, data=record
-                )
+            collection.insert_many(records)
+
+        except Exception as e:
+            exception_msg = f"Exception occured in Class : {self.class_name}, Method : {method_name}, Error : {str(e)}"
+
+            raise Exception(exception_msg)
+
+    def insert_one_record(self, db_name, collection_name, record):
+        """
+        Method Name :   insert_one_record
+        Description :   This method is used for inserting one record into a collection
+
+        Version     :   1.2
+        Revisions   :   moved setup to cloud
+        """
+        method_name = self.insert_one_record.__name__
+
+        try:
+            client = self.get_client()
+
+            database = self.create_db(client, db_name)
+
+            collection = self.get_collection(collection_name, database)
+
+            if not self.is_record_present(db_name, collection_name, record):
+                self.create_one_record(collection=collection, data=record)
 
             client.close()
 
-            return no_of_row_inserted
-
         except Exception as e:
-            raise Exception(
-                "Exception occured in class: MongoDBOperation.\
-                    Method:insertRecordInCollection error:Failed to insert record "
-                + str(e)
-            )
+            exception_msg = f"Exception occured in Class : {self.class_name}, Method : {method_name}, Error : {str(e)}"
+
+            raise Exception(exception_msg)

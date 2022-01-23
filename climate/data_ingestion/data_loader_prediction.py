@@ -1,75 +1,80 @@
-import pandas as pd
+from climate.s3_bucket_operations.s3_operations import S3_Operations
 from utils.logger import App_Logger
-from utils.main_utils import read_params
+from utils.main_utils import convert_object_to_dataframe
+from utils.read_params import read_params
 
 
-class Data_Getter_Pred:
+class data_getter_pred:
     """
-    Written By  :   iNeuron Intelligence
-    Version     :   1.0
-    Revisions   :   None
-
+    Description :   This class shall be used for obtaining the df from the source for prediction
+    Version     :   1.2
+    Revisions   :   Moved to setup to cloud run setup
     """
 
     def __init__(self, db_name, collection_name):
         self.config = read_params()
 
-        self.prediction_file = self.config["db_file"]["pred_db_file"]
-
-        self.log_writter = App_Logger()
+        self.prediction_file = self.config["export_pred_csv_file"]
 
         self.db_name = db_name
 
+        self.input_files_bucket = self.config["s3_bucket"]["input_files_bucket"]
+
+        self.s3_obj = S3_Operations()
+
         self.collection_name = collection_name
+
+        self.log_writer = App_Logger()
+
+        self.class_name = self.__class__.__name__
 
     def get_data(self):
         """
         Method Name :   get_data
-        Description :   This method reads the data from source.
-        Output      :   A pandas DataFrame.
-        On Failure  :   Raise Exception
-        Written By  :   iNeuron Intelligence
-        Version     :   1.0
-        Revisions   :   None
-
+        Description :   This method reads the data from the source
+        Output      :   A pandas dataframe
+        On failure  :   Raise Exception
+        Written by  :   iNeuron Intelligence
+        Version     :   1.1
+        Revisions   :   modified code based on params.yaml file
         """
-        self.log_writter.log(
+        method_name = self.get_data.__name__
+
+        self.log_writer.start_log(
+            key="start",
+            class_name=self.class_name,
+            method_name=method_name,
             db_name=self.db_name,
             collection_name=self.collection_name,
-            log_message="Entered the get_data method of the Data_Getter class",
         )
 
         try:
-            self.data = pd.read_csv(self.prediction_file)
-
-            self.log_writter.log(
+            csv_obj = self.s3_obj.get_file_objects_from_s3(
+                bucket=self.input_files_bucket,
+                filename=self.prediction_file,
                 db_name=self.db_name,
                 collection_name=self.collection_name,
-                log_message="Data Load Successful.Exited the get_data method of the Data_Getter class",
             )
 
-            return self.data
+            df = convert_object_to_dataframe(
+                obj=csv_obj, db_name=self.db_name, collection_name=self.collection_name
+            )
+
+            self.log_writer.start_log(
+                key="exit",
+                class_name=self.class_name,
+                method_name=method_name,
+                db_name=self.db_name,
+                collection_name=self.collection_name,
+            )
+
+            return df
 
         except Exception as e:
-            self.logger_object.log(
-                self.file_object,
-                "Exception occured in get_data method of the Data_Getter class. Exception message: "
-                + str(e),
-            )
-
-            self.log_writter.log(
+            self.log_writer.raise_exception_log(
+                error=e,
+                class_name=self.class_name,
+                method_name=method_name,
                 db_name=self.db_name,
                 collection_name=self.collection_name,
-                log_message=f"Exception occured in Class : Data_Getter, Method : get_data, Error : {str(e)}",
-            )
-
-            self.log_writter.log(
-                db_name=self.db_name,
-                collection_name=self.collection_name,
-                log_message="Data Load Unsuccessful.Exited the get_data method of the Data_Getter class",
-            )
-
-            raise Exception(
-                "Exception occured in Class : Data_Getter, Method : get_data, Error : ",
-                str(e),
             )
