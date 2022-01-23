@@ -1,164 +1,104 @@
-import pandas as pd
-from climate.data_ingestion.data_loader_prediction import data_getter_pred
-from climate.data_preprocessing.preprocessing import Preprocessor
-from climate.s3_bucket_operations.s3_operations import S3_Operations
-from utils.logger import App_Logger
-from utils.read_params import read_params
+import pandas
+from application_logging import logger
+from data_ingestion import data_loader_prediction
+from data_preprocessing import preprocessing
+from file_operations import file_methods
+from Prediction_Raw_Data_Validation.predictionDataValidation import \
+    Prediction_Data_validation
 
 
 class prediction:
-    """
-    Description :   This class shall be used for loading the production model
+    def __init__(self, path):
+        self.file_object = open("Prediction_Logs/Prediction_Log.txt", "a+")
+        self.log_writer = logger.App_Logger()
+        self.pred_data_val = Prediction_Data_validation(path)
 
-    Version     :   1.2
-    Revisions   :   moved to setup to cloud
-    """
-
-    def __init__(self):
-        self.config = read_params()
-
-        self.pred_log = self.config["pred_db_log"]["pred_main"]
-
-        self.db_name = self.config["db_log"]["db_pred_log"]
-
-        self.model_bucket = self.config["s3_bucket"]["climate_model_bucket"]
-
-        self.input_files_bucket = self.config["s3_bucket"]["inputs_files_bucket"]
-
-        self.prod_model_dir = self.config["models_dir"]["prod"]
-
-        self.pred_output_file = self.config["pred_output_file"]
-
-        self.log_writer = App_Logger()
-
-        self.s3_obj = S3_Operations()
-
-        self.data_getter_pred = data_getter_pred(
-            db_name=self.db_name, collection_name=self.pred_log
-        )
-
-        self.preprocessor = Preprocessor(
-            db_name=self.db_name, collection_name=self.pred_log
-        )
-
-        self.class_name = self.__class__.__name__
-
-    def predict_from_model(self):
-        """
-        Method Name :   predict_from_model
-        Description :   This method is used for loading from prod model dir of s3 bucket and use them for prediction
-
-        Version     :   1.2
-        Revisions   :   moved setup to cloud
-        """
-        method_name = self.predict_from_model.__name__
-
-        self.log_writer.start_log(
-            key="start",
-            class_name=self.class_name,
-            method_name=method_name,
-            db_name=self.db_name,
-            collection_name=self.pred_log,
-        )
+    def predictionFromModel(self):
 
         try:
-            self.log_writer.log(
-                db_name=self.db_name,
-                collection_name=self.pred_log,
-                log_message="Start of Prediction",
+            self.pred_data_val.deletePredictionFile()  # deletes the existing prediction file from last run!
+            self.log_writer.log(self.file_object, "Start of Prediction")
+            data_getter = data_loader_prediction.Data_Getter_Pred(
+                self.file_object, self.log_writer
+            )
+            data = data_getter.get_data()
+
+            # code change
+            # wafer_names=data['Wafer']
+            # data=data.drop(labels=['Wafer'],axis=1)
+
+            preprocessor = preprocessing.Preprocessor(self.file_object, self.log_writer)
+            data = preprocessor.dropUnnecessaryColumns(
+                data,
+                ["DATE", "Precip", "WETBULBTEMPF", "DewPointTempF", "StationPressure"],
             )
 
-            self.s3_obj.delete_pred_file(
-                db_name=self.db_name, collection_name=self.pred_log
+            # replacing '?' values with np.nan as discussed in the EDA part
+
+            data = preprocessor.replaceInvalidValuesWithNull(data)
+
+            is_null_present, cols_with_missing_values = preprocessor.is_null_present(
+                data
             )
-
-            data = self.data_getter_pred.get_data()
-
-            is_null_present = self.preprocessor.is_null_present(data)
-
             if is_null_present:
-                data = self.preprocessor.impute_missing_values(data)
+                data = preprocessor.impute_missing_values(data)
 
-            cols_to_drop = self.preprocessor.get_columns_with_zero_std_deviation(data)
-
-            data = self.preprocessor.remove_columns(data, cols_to_drop)
-
-            kmeans = self.s3_obj.load_model_from_s3(
-                bucket=self.model_bucket,
-                model_name="KMeans",
-                db_name=self.db_name,
-                collection_name=self.pred_log,
+            # scale the prediction data
+            data_scaled = pandas.DataFrame(
+                preprocessor.standardScalingData(data), columns=data.columns
             )
 
-            clusters = kmeans.predict(data.drop(["climate"], axis=1))
+            # data=data.to_numpy()
+            file_loader = file_methods.File_Operation(self.file_object, self.log_writer)
+            kmeans = file_loader.load_model("KMeans")
 
-            data["clusters"] = clusters
-
-            clusters = data["clusters"].unique()
+            ##Code changed
+            # pred_data = data.drop(['Wafer'],axis=1)
+            clusters = kmeans.predict(
+                data_scaled
+            )  # drops the first column for cluster prediction
+            data_scaled["clusters"] = clusters
+            clusters = data_scaled["clusters"].unique()
+            result = []  # initialize blank list for storing predicitons
+            # with open('EncoderPickle/enc.pickle', 'rb') as file: #let's load the encoder pickle file to decode the values
+            #     encoder = pickle.load(file)
 
             for i in clusters:
-                cluster_data = data[data["clusters"] == i]
-
-                climate_names = list(cluster_data["climate"])
-
-                cluster_data = data.drop(labels=["climate"], axis=1)
-
+                cluster_data = data_scaled[data_scaled["clusters"] == i]
                 cluster_data = cluster_data.drop(["clusters"], axis=1)
-
-                model_name = self.s3_obj.find_correct_model_file(
-                    cluster_number=i,
-                    bucket_name=self.model_bucket,
-                    db_name=self.db_name,
-                    collection_name=self.pred_log,
-                )
-
-                model = self.s3_obj.load_model_from_s3(
-                    bucket=self.model_bucket,
-                    model_name=model_name,
-                    db_name=self.db_name,
-                    collection_name=self.pred_log,
-                )
-
-                result = list(model.predict(cluster_data))
-
-                result = pd.DataFrame(
-                    list(zip(climate_names, result)), columns=["climate", "Prediction"]
-                )
-
-                self.s3_obj.upload_df_as_csv_to_s3(
-                    data_frame=result,
-                    file_name=self.pred_output_file,
-                    bucket=self.input_files_bucket,
-                    dest_file_name=self.pred_output_file,
-                    db_name=self.db_name,
-                    collection_name=self.pred_log,
-                )
-
-            self.log_writer.start_log(
-                key="exit",
-                class_name=self.class_name,
-                method_name=method_name,
-                db_name=self.db_name,
-                collection_name=self.pred_log,
-            )
-
+                model_name = file_loader.find_correct_model_file(i)
+                model = file_loader.load_model(model_name)
+                for val in model.predict(cluster_data.values):
+                    result.append(val)
+            result = pandas.DataFrame(result, columns=["Predictions"])
+            path = "Prediction_Output_File/Predictions.csv"
+            result.to_csv(
+                "Prediction_Output_File/Predictions.csv", header=True
+            )  # appends result to prediction file
+            self.log_writer.log(self.file_object, "End of Prediction")
+        except Exception as ex:
             self.log_writer.log(
-                db_name=self.db_name,
-                collection_name=self.pred_log,
-                log_message="End of Prediction",
+                self.file_object,
+                "Error occured while running the prediction!! Error:: %s" % ex,
             )
+            raise ex
+        return path
 
-            return (
-                self.input_files_bucket,
-                self.pred_output_file,
-                result.head().to_json(orient="records"),
-            )
-
-        except Exception as e:
-            self.log_writer.raise_exception_log(
-                error=e,
-                class_name=self.class_name,
-                method_name=method_name,
-                db_name=self.db_name,
-                collection_name=self.pred_log,
-            )
+        # old code
+        # i=0
+        # for row in data:
+        #     cluster_number=kmeans.predict([row])
+        #     model_name=file_loader.find_correct_model_file(cluster_number[0])
+        #
+        #     model=file_loader.load_model(model_name)
+        #     #row= sparse.csr_matrix(row)
+        #     result=model.predict([row])
+        #     if (result[0]==-1):
+        #         category='Bad'
+        #     else:
+        #         category='Good'
+        #     self.predictions.write("Wafer-"+ str(wafer_names[i])+','+category+'\n')
+        #     i=i+1
+        #     self.log_writer.log(self.file_object,'The Prediction is :' +str(result))
+        # self.log_writer.log(self.file_object,'End of Prediction')
+        # print(result)

@@ -1,64 +1,103 @@
-import os
-
-import pandas as pd
+from climate.s3_bucket_operations.s3_operations import S3_Operations
 from utils.logger import App_Logger
+from utils.main_utils import convert_object_to_dataframe
 from utils.read_params import read_params
 
 
 class data_transform_train:
     """
-    Written By  :   iNeuron Intelligence
+    Description :  This class shall be used for transforming the training batch data before loading it in Database!!.
     Version     :   1.0
     Revisions   :   None
-
     """
 
     def __init__(self):
         self.config = read_params()
 
-        self.goodDataPath = self.config["data"]["good"]["train"]
+        self.train_data_bucket = self.config["s3_bucket"]["climate_train_data_bucket"]
 
-        self.logger = App_Logger()
+        self.s3_obj = S3_Operations()
+
+        self.log_writer = App_Logger()
+
+        self.good_train_data_dir = self.config["data"]["train"]["good_data_dir"]
+
+        self.class_name = self.__class__.__name__
 
         self.db_name = self.config["db_log"]["db_train_log"]
 
-        self.addQuotesToString_log = self.config["train_db_log"][
-            "addQuotesToString_log"
-        ]
+        self.train_data_transform_log = self.config["train_db_log"]["data_transform"]
 
-    def addQuotesToStringValuesInColumn(self):
+    def add_quotes_to_string(self):
         """
-        Method Name :   addQuotesToStringValuesInColumn
-        Description :   This method converts all the columns with string datatype such that
-                        each value for that column is enclosed in quotes. This is done
-                        to avoid the error while inserting string values in table as varchar.
-        Written By  :   iNeuron Intelligence
-        Version     :   1.0
-        Revisions   :   None
+        Method Name :   add_quotes_to_string
+        Description :   This method addes the quotes to the string data present in columns
+        Version     :   1.2
+        Revisions   :   moved setup to cloud
+        """
+        method_name = self.add_quotes_to_string.__name__
 
-        """
+        self.log_writer.start_log(
+            key="start",
+            class_name=self.class_name,
+            method_name=method_name,
+            db_name=self.db_name,
+            collection_name=self.train_data_transform_log,
+        )
+
         try:
-            onlyfiles = [f for f in os.listdir(self.goodDataPath)]
+            csv_file_objs = self.s3_obj.get_file_objects_from_s3(
+                bucket=self.train_data_bucket,
+                filename=self.good_train_data_dir,
+                db_name=self.db_name,
+                collection_name=self.train_data_transform_log,
+            )
 
-            for file in onlyfiles:
-                f = os.path.join(self.goodDataPath, file)
+            for f in csv_file_objs:
+                file = f.key
 
-                data = pd.read_csv(f)
+                abs_f = file.split("/")[-1]
 
-                data["DATE"] = data["DATE"].apply(lambda x: "'" + str(x) + "'")
+                if file.endswith(".csv"):
+                    df = convert_object_to_dataframe(
+                        obj=f,
+                        db_name=self.db_name,
+                        collection_name=self.train_data_transform_log,
+                    )
 
-                data.to_csv(self.goodDataPath + "/" + file, index=None, header=True)
+                    df["DATE"] = df["DATE"].apply(lambda x: "'" + str(x) + "'")
 
-                self.logger.log(
-                    db_name=self.db_name,
-                    collection_name=self.addQuotesToString_log,
-                    log_message=" %s:  Quotes added successfully!!" % file,
-                )
+                    self.log_writer.log(
+                        db_name=self.db_name,
+                        collection_name=self.train_data_transform_log,
+                        log_message=f"Quotes added for the file {file}",
+                    )
+
+                    self.s3_obj.upload_df_as_csv_to_s3(
+                        data_frame=df,
+                        file_name=abs_f,
+                        bucket=self.train_data_bucket,
+                        dest_file_name=file,
+                        db_name=self.db_name,
+                        collection_name=self.train_data_transform_log,
+                    )
+
+                else:
+                    pass
+
+            self.log_writer.start_log(
+                key="exit",
+                class_name=self.class_name,
+                method_name=method_name,
+                db_name=self.db_name,
+                collection_name=self.train_data_transform_log,
+            )
 
         except Exception as e:
-            self.logger.log(
+            self.log_writer.raise_exception_log(
+                error=e,
+                class_name=self.class_name,
+                method_name=method_name,
                 db_name=self.db_name,
-                collection_name=self.addQuotesToString_log,
-                log_message=f"Exception occured in Class : dataTransform \
-                    Method : addQuotesToStringValuesInColumn, Error : {str(e)}",
+                collection_name=self.train_data_transform_log,
             )

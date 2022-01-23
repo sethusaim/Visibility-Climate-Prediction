@@ -11,7 +11,6 @@ class Preprocessor:
     Written By  :   iNeuron Intelligence
     Version     :   1.0
     Revisions   :   None
-
     """
 
     def __init__(self, db_name, collection_name):
@@ -25,14 +24,14 @@ class Preprocessor:
 
     def remove_columns(self, data, columns):
         """
-        Method Name: remove_columns
-        Description: This method removes the given columns from a pandas dataframe.
-        Output: A pandas DataFrame after removing the specified columns.
-        On Failure: Raise Exception
+        Method Name :   remove_columns
+        Description :   This method removes the given columns from a pandas dataframe.
+        Output      :   A pandas DataFrame after removing the specified columns.
+        On Failure  :   Raise Exception
 
-        Written By: iNeuron Intelligence
-        Version: 1.0
-        Revisions: None
+        Written By  :   iNeuron Intelligence
+        Version     :   1.0
+        Revisions   :   None
 
         """
         self.log_writter.log(

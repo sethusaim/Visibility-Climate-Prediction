@@ -1,5 +1,5 @@
-from climate.dataTransform.data_transformation_pred import dataTransformPredict
-from climate.dataTypeValid.data_type_valid_pred import dBOperation
+from climate.data_transform.data_transformation_pred import data_transform_pred
+from climate.data_type_valid.data_type_valid_pred import db_operation_pred
 from climate.raw_data_validation.pred_data_validation import Prediction_Data_validation
 from utils.logger import App_Logger
 from utils.main_utils import read_params
@@ -11,9 +11,9 @@ class pred_validation:
 
         self.raw_data = Prediction_Data_validation(path)
 
-        self.dataTransform = dataTransformPredict()
+        self.data_transform = data_transform_pred()
 
-        self.dBOperation = dBOperation()
+        self.db_operation = db_operation_pred()
 
         self.file_object = open("Prediction_Logs/Prediction_Log.txt", "a+")
 

@@ -6,27 +6,53 @@ from utils.read_params import read_params
 
 
 class train_validation:
-    def __init__(self, path):
+    """
+    Description :   This class is used for validating all the training batch files
+
+    Version     :   1.2
+    Revisions   :   moved to setup to cloud
+    """
+
+    def __init__(self, bucket_name):
+        self.raw_data = raw_train_data_validation(raw_data_bucket_name=bucket_name)
+
+        self.data_transform = data_transform_train()
+
+        self.db_operation = db_operation_train()
+
         self.config = read_params()
 
-        self.raw_data = raw_train_data_validation(path)
-
-        self.dataTransform = data_transform_train()
-
-        self.dBOperation = db_operation_train()
+        self.class_name = self.__class__.__name__
 
         self.db_name = self.config["db_log"]["db_train_log"]
 
-        self.train_main_log = self.config["train_db_log"]["training_main_log"]
+        self.train_main_log = self.config["train_db_log"]["train_main"]
+
+        self.good_data_db_name = self.config["mongodb"]["climate_data_db_name"]
+
+        self.good_data_collection_name = self.config["mongodb"][
+            "climate_train_data_collection"
+        ]
 
         self.log_writer = App_Logger()
 
     def train_validation(self):
+        """
+        Method Name :   train_validation
+        Description :   This method is used for validating the training batch files
+
+        Version     :   1.2
+        Revisions   :   moved setup to cloud
+        """
+        method_name = self.train_validation.__name__
+
         try:
-            self.log_writer.log(
+            self.log_writer.start_log(
+                key="start",
+                class_name=self.class_name,
+                method_name=method_name,
                 db_name=self.db_name,
                 collection_name=self.train_main_log,
-                log_message="Start of Validation on files for training!!",
             )
 
             (
@@ -34,113 +60,67 @@ class train_validation:
                 LengthOfTimeStampInFile,
                 column_names,
                 noofcolumns,
-            ) = self.raw_data.valuesFromSchema()
+            ) = self.raw_data.values_from_schema()
 
-            regex = self.raw_data.manualRegexCreation()
+            regex = self.raw_data.get_regex_pattern()
 
-            self.raw_data.validationFileNameRaw(
+            self.raw_data.validate_raw_file_name(
                 regex, LengthOfDateStampInFile, LengthOfTimeStampInFile
             )
 
-            self.raw_data.validateColumnLength(noofcolumns)
+            self.raw_data.validate_col_length(NumberofColumns=noofcolumns)
 
-            self.raw_data.validateMissingValuesInWholeColumn()
-
-            self.log_writer.log(
-                db_name=self.db_name,
-                collection_name=self.train_main_log,
-                log_message="Raw Data Validation Complete!!",
-            )
+            self.raw_data.validate_missing_values_in_col()
 
             self.log_writer.log(
                 db_name=self.db_name,
                 collection_name=self.train_main_log,
-                log_message="Starting Data Transforamtion!!",
-            )
-
-            self.dataTransform.addQuotesToStringValuesInColumn()
-
-            self.log_writer.log(
-                db_name=self.db_name,
-                collection_name=self.train_main_log,
-                log_message="DataTransformation Completed!!!",
+                log_message="Raw Data Validation Completed !!",
             )
 
             self.log_writer.log(
                 db_name=self.db_name,
                 collection_name=self.train_main_log,
-                log_message="Creating Training_Database and tables on the basis of given schema!!!",
+                log_message="Starting Data Transformation",
             )
 
-            self.dBOperation.createTableDb(
-                self.config["db_name"]["train_db_name"], column_names
+            self.data_transform.add_quotes_to_string()
+
+            self.log_writer.log(
+                db_name=self.db_name,
+                collection_name=self.train_main_log,
+                log_message="Data Transformation completed !!",
+            )
+
+            self.db_operation.insert_good_data_as_record(
+                db_name=self.good_data_db_name,
+                collection_name=self.good_data_collection_name,
             )
 
             self.log_writer.log(
                 db_name=self.db_name,
                 collection_name=self.train_main_log,
-                log_message="Table creation Completed!!",
+                log_message="Data type validation Operation completed !!",
             )
 
-            self.log_writer.log(
+            self.db_operation.export_collection_to_csv(
+                db_name=self.good_data_db_name,
+                collection_name=self.good_data_collection_name,
+            )
+
+            self.log_writer.start_log(
+                key="exit",
+                class_name=self.class_name,
+                method_name=method_name,
                 db_name=self.db_name,
                 collection_name=self.train_main_log,
-                log_message="Insertion of Data into Table started!!!!",
-            )
-
-            self.dBOperation.insertIntoTableGoodData(
-                self.config["db_name"]["train_db_name"]
-            )
-
-            self.log_writer.log(
-                db_name=self.db_name,
-                collection_name=self.train_main_log,
-                log_message="Insertion in Table completed!!!",
-            )
-
-            self.log_writer.log(
-                db_name=self.db_name,
-                collection_name=self.train_main_log,
-                log_message="Deleting Good Data Folder!!!",
-            )
-
-            self.raw_data.deleteExistingGoodDataTrainingFolder()
-
-            self.log_writer.log(
-                db_name=self.db_name,
-                collection_name=self.train_main_log,
-                log_message="Good_Data folder deleted!!!",
-            )
-
-            self.log_writer.log(
-                db_name=self.db_name,
-                collection_name=self.train_main_log,
-                log_message="Moving bad files to Archive and deleting Bad_Data folder!!!",
-            )
-
-            self.raw_data.moveBadFilesToArchiveBad()
-
-            self.log_writer.log(
-                db_name=self.db_name,
-                collection_name=self.train_main_log,
-                log_message="Bad files moved to archive!! Bad folder Deleted!!",
-            )
-
-            self.log_writer.log(
-                db_name=self.db_name,
-                collection_name=self.train_main_log,
-                log_message="Validation Operation completed!!",
-            )
-
-            self.log_writer.log(
-                db_name=self.db_name,
-                collection_name=self.train_main_log,
-                log_message="Extracting csv file from table",
-            )
-
-            self.dBOperation.selectingDatafromtableintocsv(
-                Database=self.config["db_name"]["train_db_name"]
             )
 
         except Exception as e:
-            raise e
+            self.log_writer.raise_exception_log(
+                error=e,
+                class_name=self.class_name,
+                method_name=method_name,
+                db_name=self.db_name,
+                collection_name=self.train_main_log,
+            )
