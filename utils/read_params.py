@@ -2,6 +2,13 @@ import yaml
 
 
 def read_params(config_path="params.yaml"):
+    """
+    Method Name :   read_params
+    Description :   This method is used for read the params from yaml file
+
+    Version     :   1.2
+    Revisions   :   moved setup to cloud
+    """
     method_name = read_params.__name__
 
     try:
@@ -11,8 +18,6 @@ def read_params(config_path="params.yaml"):
         return config
 
     except Exception as e:
-        exception_msg = (
-            f"Exception occured in {__file__},Method : {method_name}, Error : {str(e)}"
+        raise Exception(
+            f"Exception occured in {__file__}, Method : {method_name}, Error : {str(e)}"
         )
-
-        raise Exception(exception_msg)

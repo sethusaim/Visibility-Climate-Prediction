@@ -1,5 +1,6 @@
 import numpy as np
 import pandas as pd
+from climate.s3_bucket_operations.s3_operations import S3_Operations
 from sklearn.impute import KNNImputer
 from sklearn.preprocessing import StandardScaler
 from utils.logger import App_Logger
@@ -9,18 +10,30 @@ from utils.read_params import read_params
 class Preprocessor:
     """
     Written By  :   iNeuron Intelligence
-    Version     :   1.0
-    Revisions   :   None
+    Version     :   1.2
+    Revisions   :   moved setup to cloud
     """
 
-    def __init__(self, db_name, collection_name):
+    def __init__(self, table_name):
+        self.log_writer = App_Logger()
+
         self.config = read_params()
 
-        self.db_name = db_name
+        self.class_name = self.__class__.__name__
 
-        self.collection_name = collection_name
+        self.table_name = table_name
 
-        self.log_writter = App_Logger()
+        self.null_values_file = self.config["null_values_csv_file"]
+
+        self.n_components = self.config["pca_model"]["n_components"]
+
+        self.knn_n_neighbors = self.config["n_neighbors"]
+
+        self.knn_weights = (self.config["weights"],)
+
+        self.input_files_bucket = self.config["s3_bucket"]["input_files_bucket"]
+
+        self.s3_obj = S3_Operations()
 
     def remove_columns(self, data, columns):
         """
@@ -30,14 +43,16 @@ class Preprocessor:
         On Failure  :   Raise Exception
 
         Written By  :   iNeuron Intelligence
-        Version     :   1.0
-        Revisions   :   None
-
+        Version     :   1.2
+        Revisions   :   moved setup to cloud
         """
-        self.log_writter.log(
-            db_name=self.db_name,
-            collection_name=self.collection_name,
-            log_message="Entered the remove_columns method of the Preprocessor class",
+        method_name = self.remove_columns.__name__
+
+        self.log_writer.start_log(
+            key="start",
+            class_name=self.class_name,
+            method_name=method_name,
+            table_name=self.table_name,
         )
 
         self.data = data
@@ -47,30 +62,29 @@ class Preprocessor:
         try:
             self.useful_data = self.data.drop(labels=self.columns, axis=1)
 
-            self.log_writter.log(
-                db_name=self.db_name,
-                collection_name=self.collection_name,
-                log_message="Column removal Successful.Exited the remove_columns method of the Preprocessor class",
+            self.log_writer.log(
+                table_name=self.table_name, log_message="Column removal Successful"
+            )
+
+            self.log_writer.start_log(
+                key="exit",
+                class_name=self.class_name,
+                method_name=method_name,
+                table_name=self.table_name,
             )
 
             return self.useful_data
 
         except Exception as e:
-            self.log_writter.log(
-                db_name=self.db_name,
-                collection_name=self.collection_name,
-                log_message=f"Exception occured in Class : Preprocessor, Method : remove_columns, Error : {str(e)}",
+            self.log_writer.log(
+                table_name=self.table_name, log_message="Column removal Unsuccessful"
             )
 
-            self.log_writter.log(
-                db_name=self.db_name,
-                collection_name=self.collection_name,
-                log_message="Column removal Unsuccessful. Exited the remove_columns method of the Preprocessor class",
-            )
-
-            raise Exception(
-                "Exception occured in Class : Preprocessor, Method : remove_columns, Error : ",
-                str(e),
+            self.log_writer.raise_exception_log(
+                error=e,
+                class_name=self.class_name,
+                method_name=method_name,
+                table_name=self.table_name,
             )
 
     def separate_label_feature(self, data, label_column_name):
@@ -80,14 +94,17 @@ class Preprocessor:
         Output      :   Returns two separate Dataframes, one containing features and the other containing Labels .
         On Failure  :   Raise Exception
         Written By  :   iNeuron Intelligence
-        Version     :   1.0
-        Revisions   :   None
+        Version     :   1.2
+        Revisions   :   moved setup to cloud
 
         """
-        self.log_writter.log(
-            db_name=self.db_name,
-            collection_name=self.collection_name,
-            log_message="Entered the separate_label_feature method of the Preprocessor class",
+        method_name = self.separate_label_feature.__name__
+
+        self.log_writer.start_log(
+            key="start",
+            class_name=self.class_name,
+            method_name=method_name,
+            table_name=self.table_name,
         )
 
         try:
@@ -95,68 +112,92 @@ class Preprocessor:
 
             self.Y = data[label_column_name]
 
-            self.log_writter.log(
-                db_name=self.db_name,
-                collection_name=self.collection_name,
-                log_message="Label Separation Successful. Exited the separate_label_feature method of the Preprocessor class",
+            self.log_writer.log(
+                table_name=self.table_name,
+                log_message="Label Separation Successful",
+            )
+
+            self.log_writer.start_log(
+                key="exit",
+                class_name=self.class_name,
+                method_name=method_name,
+                table_name=self.table_name,
             )
 
             return self.X, self.Y
 
         except Exception as e:
-            self.log_writter.log(
-                db_name=self.db_name,
-                collection_name=self.collection_name,
-                log_message=f"Exception occured in Class : Preprocessor, Method : separate_label_feature, Error : {str(e)}",
+            self.log_writer.log(
+                table_name=self.table_name,
+                log_message="Label Separation Unsuccessful",
             )
 
-            self.log_writter.log(
-                db_name=self.db_name,
-                collection_name=self.collection_name,
-                log_message="Label Separation Unsuccessful. Exited the separate_label_feature method of the Preprocessor class",
+            self.log_writer.raise_exception_log(
+                error=e,
+                class_name=self.class_name,
+                method_name=method_name,
+                table_name=self.table_name,
             )
 
-            raise Exception(
-                "Exception occured in Class : Preprocessor, Method : separate_label_feature, Error : ",
-                str(e),
-            )
-
-    def dropUnnecessaryColumns(self, data, columnNameList):
+    def drop_unnecessary_columns(self, data, columnNameList):
         """
-        Method Name :   is_null_present
+        Method Name :   drop_unnecessary_columns
         Description :   This method drops the unwanted columns as discussed in EDA section.
         Written By  :   iNeuron Intelligence
-        Version     :   1.0
-        Revisions   :   None
+        Version     :   1.2
+        Revisions   :   moved setup to cloud
 
         """
+        method_name = self.drop_unnecessary_columns.__name__
+
+        self.log_writer.start_log(
+            key="start",
+            class_name=self.class_name,
+            method_name=method_name,
+            table_name=self.table_name,
+        )
+
         try:
             data = data.drop(columnNameList, axis=1)
+
+            self.log_writer.log(
+                table_name=self.table_name, log_message="Dropped unnecessary columns"
+            )
+
+            self.log_writer.start_log(
+                key="exit",
+                class_name=self.class_name,
+                method_name=method_name,
+                table_name=self.table_name,
+            )
 
             return data
 
         except Exception as e:
-            self.log_writter.log(
-                db_name=self.db_name,
-                collection_name=self.collection_name,
-                log_message=f"Exception occured in Class : Preprocessor, Method : dropUnnecessaryColumns, Error : {str(e)}",
+            self.log_writer.raise_exception_log(
+                error=e,
+                class_name=self.class_name,
+                method_name=method_name,
+                table_name=self.table_name,
             )
 
-            raise Exception(
-                "Exception occured in Class : Preprocessor, Method : dropUnnecessaryColumns, Error : ",
-                str(e),
-            )
-
-    def replaceInvalidValuesWithNull(self, data):
-
+    def replace_invalid_with_null(self, data):
         """
-        Method Name :   is_null_present
+        Method Name :   replace_invalid_with_null
         Description :   This method replaces invalid values i.e. '?' with null, as discussed in EDA.
         Written By  :   iNeuron Intelligence
-        Version     :   1.0
-        Revisions   :   None
-
+        Version     :   1.2
+        Revisions   :   moved setup to cloud
         """
+        method_name = self.replace_invalid_with_null.__name__
+
+        self.log_writer.start_log(
+            key="start",
+            class_name=self.class_name,
+            method_name=method_name,
+            table_name=self.table_name,
+        )
+
         try:
             for column in data.columns:
                 count = data[column][data[column] == "?"].count()
@@ -164,20 +205,26 @@ class Preprocessor:
                 if count != 0:
                     data[column] = data[column].replace("?", np.nan)
 
+            self.log_writer.log(
+                table_name=self.table_name,
+                log_message="Replaced invalid values with np.nan",
+            )
+
+            self.log_writer.start_log(
+                key="exit",
+                class_name=self.class_name,
+                method_name=method_name,
+                table_name=self.table_name,
+            )
+
             return data
 
         except Exception as e:
-            self.log_writter.log(
-                db_name=self.db_name,
-                collection_name=self.collection_name,
-                log_message=f"Exception occured in Class : Preprocessor. \
-                    Method : replaceInvalidValuesWithNull, Error : {str(e)}",
-            )
-
-            raise Exception(
-                "Exception occured in Class : Preprocessor. \
-                Method : replaceInvalidValuesWithNull, Error : ",
-                str(e),
+            self.log_writer.raise_exception_log(
+                error=e,
+                class_name=self.class_name,
+                method_name=method_name,
+                table_name=self.table_name,
             )
 
     def is_null_present(self, data):
@@ -185,17 +232,19 @@ class Preprocessor:
         Method Name :   is_null_present
         Description :   This method checks whether there are null values present in the pandas Dataframe or not.
         Output      :   Returns True if null values are present in the DataFrame, False if they are not present and
-                        returns the list of columns for which null values are present.
+        returns the list of columns for which null values are present.
         On Failure  :   Raise Exception
         Written By  :   iNeuron Intelligence
-        Version     :   1.0
-        Revisions   :   None
-
+        Version     :   1.2
+        Revisions   :   moved setup to cloud
         """
-        self.log_writter.log(
-            db_name=self.db_name,
-            collection_name=self.collection_name,
-            log_message="Entered the is_null_present method of the Preprocessor class",
+        method_name = self.is_null_present.__name__
+
+        self.log_writer.start_log(
+            key="start",
+            class_name=self.class_name,
+            method_name=method_name,
+            table_name=self.table_name,
         )
 
         self.null_present = False
@@ -222,176 +271,203 @@ class Preprocessor:
                     data.isna().sum()
                 )
 
-                self.dataframe_with_null.to_csv("preprocessing_data/null_values.csv")
+            self.log_writer.log(
+                table_name=self.table_name,
+                log_message="Created data frame with null values",
+            )
 
-                self.dataframe_with_null.to_csv(self.config["null_values_csv_file"])
+            self.s3_obj.upload_df_as_csv_to_s3(
+                data_frame=self.dataframe_with_null,
+                file_name=self.null_values_file,
+                bucket=self.input_files_bucket,
+                dest_file_name=self.null_values_file,
+            )
 
-            self.log_writter.log(
-                db_name=self.db_name,
-                collection_name=self.collection_name,
-                log_message="Finding missing values is a success.Data written to the null values file.\
-                     Exited the is_null_present method of the Preprocessor class",
+            self.log_writer.start_log(
+                key="exit",
+                class_name=self.class_name,
+                method_name=method_name,
+                table_name=self.table_name,
             )
 
             return self.null_present
 
         except Exception as e:
-            self.log_writter.log(
-                db_name=self.db_name,
-                collection_name=self.collection_name,
-                log_message=f"Exception occured in Class : Preprocessor, Method : is_null_present, Error : {str(e)}",
+            self.log_writer.log(
+                table_name=self.table_name,
+                log_message="Finding missing values failed",
             )
 
-            self.log_writter.log(
-                db_name=self.db_name,
-                collection_name=self.collection_name,
-                log_message="Finding missing values failed. Exited the is_null_present method of the Preprocessor class",
+            self.log_writer.raise_exception_log(
+                error=e,
+                class_name=self.class_name,
+                method_name=method_name,
+                table_name=self.table_name,
             )
 
-            raise Exception(
-                f"Exception occured in Class : Preprocessor, Method : is_null_present, Error : {str(e)}"
-            )
-
-    def encodeCategoricalValues(self, data):
+    def encode_target_cols(self, data):
         """
-        Method Name :   encodeCategoricalValues
+        Method Name :   encode_target_cols
         Description :   This method encodes all the categorical values in the training set.
         Output      :   A Dataframe which has all the categorical values encoded.
         On Failure  :   Raise Exception
         Written By  :   iNeuron Intelligence
-        Version     :   1.0
-        Revisions   :   None
+        Version     :   1.2
+        Revisions   :   moved setup to cloud
         """
+        method_name = self.encode_target_cols.__name__
+
+        self.log_writer.start_log(
+            key="start",
+            class_name=self.class_name,
+            method_name=method_name,
+            table_name=self.table_name,
+        )
+
         try:
             data["class"] = data["class"].map({"p": 1, "e": 2})
 
             for column in data.drop(["class"], axis=1).columns:
                 data = pd.get_dummies(data, columns=[column])
 
-            return data
-
-        except Exception as e:
-            self.log_writter.log(
-                db_name=self.db_name,
-                collection_name=self.collection_name,
-                log_message="Finding missing values failed. \
-                    Exited the encodeCategoricalValues method of the Preprocessor class",
+            self.log_writer.log(
+                table_name=self.table_name, log_message="Encoded target columns"
             )
 
-            raise Exception(
-                f"Exception occured in Class : Preprocessor. \
-                Method : encodeCategoricalValues, Error : {str(e)}"
+            self.log_writer.start_log(
+                key="exit",
+                class_name=self.class_name,
+                method_name=method_name,
+                table_name=self.table_name,
             )
-
-    def encodeCategoricalValuesPrediction(self, data):
-        """
-        Method Name :   encodeCategoricalValuesPrediction
-        Description :   This method encodes all the categorical values in the prediction set.
-        Output      :   A Dataframe which has all the categorical values encoded.
-        On Failure  :   Raise Exception
-        Written By  :   iNeuron Intelligence
-        Version     :   1.0
-        Revisions   :   None
-        """
-        try:
-            for column in data.columns:
-                data = pd.get_dummies(data, columns=[column])
 
             return data
 
         except Exception as e:
-            self.log_writter.log(
-                db_name=self.db_name,
-                collection_name=self.collection_name,
-                log_message="Finding missing values failed. \
-                    Exited the encodeCategoricalValues method of the Preprocessor class",
+            self.log_writer.raise_exception_log(
+                error=e,
+                class_name=self.class_name,
+                method_name=method_name,
+                table_name=self.table_name,
             )
 
-            raise Exception(
-                f"Exception occured in Class : Preprocessor. \
-                Method : encodeCategoricalValues, Error : {str(e)}"
-            )
+    def apply_standard_scaler(self, X):
+        """
+        Method Name : apply_standard_scaler
+        Description : This method replaces all the missing values in the Dataframe using KNN Imputer.
+        Output      : A Dataframe which has all the missing values imputed.
+        On Failure  : Raise Exception
 
-    def standardScalingData(self, X):
+        Written By  : iNeuron Intelligence
+        Version     : 1.2
+        Revisions   : moved setup to cloud
+        """
+        method_name = self.apply_standard_scaler.__name__
+
+        self.log_writer.start_log(
+            key="start",
+            class_name=self.class_name,
+            method_name=method_name,
+            table_name=self.table_name,
+        )
+
         try:
             scalar = StandardScaler()
 
             X_scaled = scalar.fit_transform(X)
 
+            self.log_writer.log(
+                table_name=self.table_name,
+                log_message=f"Transformed data using {scalar.__class__.__name__}",
+            )
+
+            self.log_writer.start_log(
+                key="exit",
+                class_name=self.class_name,
+                method_name=method_name,
+                table_name=self.table_name,
+            )
+
             return X_scaled
 
         except Exception as e:
-            self.log_writter.log(
-                db_name=self.db_name,
-                collection_name=self.collection_name,
-                log_message="Finding missing values failed. \
-                    Exited the standardScalingData method of the Preprocessor class",
-            )
-
-            raise Exception(
-                f"Exception occured in Class : Preprocessor. \
-                Method : standardScalingData, Error : {str(e)}"
+            self.log_writer.raise_exception_log(
+                error=e,
+                class_name=self.class_name,
+                method_name=method_name,
+                table_name=self.table_name,
             )
 
     def impute_missing_values(self, data):
         """
-        Method Name: impute_missing_values
-        Description: This method replaces all the missing values in the Dataframe using KNN Imputer.
-        Output: A Dataframe which has all the missing values imputed.
-        On Failure: Raise Exception
+        Method Name : impute_missing_values
+        Description : This method replaces all the missing values in the Dataframe using KNN Imputer.
+        Output      : A Dataframe which has all the missing values imputed.
+        On Failure  : Raise Exception
 
-        Written By: iNeuron Intelligence
-        Version: 1.0
-        Revisions: None
+        Written By  : iNeuron Intelligence
+        Version     : 1.2
+        Revisions   : moved setup to cloud
         """
+        method_name = self.impute_missing_values.__name__
 
-        self.log_writter.log(
-            db_name=self.db_name,
-            collection_name=self.collection_name,
-            log_message="Entered the impute_missing_values method of the Preprocessor class",
+        self.log_writer.start_log(
+            key="start",
+            class_name=self.class_name,
+            method_name=method_name,
+            table_name=self.table_name,
         )
 
         self.data = data
 
         try:
             imputer = KNNImputer(
-                n_neighbors=self.config["n_neighbors"],
-                weights=self.config["weights"],
+                n_neighbors=self.knn_n_neighbors,
+                weights=self.knn_weights,
                 missing_values=np.nan,
             )
 
+            self.log_writer.log(
+                table_name=self.table_name,
+                log_message=f"Initialized {imputer.__class__.__name__}",
+            )
+
             self.new_array = imputer.fit_transform(self.data)
+
+            self.log_writer.log(
+                table_name=self.table_name,
+                log_message="Imputed missing values using KNN imputer",
+            )
 
             self.new_data = pd.DataFrame(
                 data=(self.new_array), columns=self.data.columns
             )
 
-            self.log_writter.log(
-                db_name=self.db_name,
-                collection_name=self.collection_name,
-                log_message="Imputing missing values Successful. \
-                    Exited the impute_missing_values method of the Preprocessor class",
+            self.log_writer.log(
+                table_name=self.table_name,
+                log_message="Created new dataframe with imputed values",
+            )
+
+            self.log_writer.log(
+                table_name=self.table_name,
+                log_message="Imputing missing values Successful",
+            )
+
+            self.log_writer.start_log(
+                key="exit",
+                class_name=self.class_name,
+                method_name=method_name,
+                table_name=self.table_name,
             )
 
             return self.new_data
 
         except Exception as e:
-            self.log_writter.log(
-                db_name=self.db_name,
-                collection_name=self.collection_name,
-                log_message=f"Exception occured in Class : Preprocessor, Method : impute_missing_values, Error : {str(e)}",
-            )
-
-            self.log_writter.log(
-                db_name=self.db_name,
-                collection_name=self.collection_name,
-                log_message="Imputing missing values failed. \
-                    Exited the impute_missing_values method of the Preprocessor class",
-            )
-
-            raise Exception(
-                f"Exception occured in Class : Preprocessor. \
-                Method : impute_missing_values, Error : {str(e)}"
+            self.log_writer.raise_exception_log(
+                error=e,
+                class_name=self.class_name,
+                method_name=method_name,
+                table_name=self.table_name,
             )
 
     def get_columns_with_zero_std_deviation(self, data):
@@ -401,14 +477,16 @@ class Preprocessor:
         Output      :   List of the columns with standard deviation of zero
         On Failure  :   Raise Exception
         Written By  :   iNeuron Intelligence
-        Version     :   1.0
-        Revisions   :   None
+        Version     :   1.2
+        Revisions   :   moved setup to cloud
         """
+        method_name = self.get_columns_with_zero_std_deviation.__name__
 
-        self.log_writter.log(
-            db_name=self.db_name,
-            collection_name=self.collection_name,
-            log_message="Entered the get_columns_with_zero_std_deviation method of the Preprocessor class",
+        self.log_writer.start_log(
+            key="start",
+            class_name=self.class_name,
+            method_name=method_name,
+            table_name=self.table_name,
         )
 
         self.columns = data.columns
@@ -422,31 +500,29 @@ class Preprocessor:
                 if self.data_n[x]["std"] == 0:
                     self.col_to_drop.append(x)
 
-            self.log_writter.log(
-                db_name=self.db_name,
-                collection_name=self.collection_name,
-                log_message="Column search for Standard Deviation of Zero Successful. \
-                    Exited the get_columns_with_zero_std_deviation method of the Preprocessor class",
+            self.log_writer.log(
+                table_name=self.table_name,
+                log_message="Column search for Standard Deviation of Zero Successful",
+            )
+
+            self.log_writer.start_log(
+                key="exit",
+                class_name=self.class_name,
+                method_name=method_name,
+                table_name=self.table_name,
             )
 
             return self.col_to_drop
 
         except Exception as e:
-            self.log_writter.log(
-                db_name=self.db_name,
-                collection_name=self.collection_name,
-                log_message=f"Exception occured in Class : Preprocessor. \
-                    Method : get_columns_with_zero_std_deviation, Error : {str(e)}",
+            self.log_writer.log(
+                table_name=self.table_name,
+                log_message="Column search for Standard Deviation of Zero Failed",
             )
 
-            self.log_writter.log(
-                db_name=self.db_name,
-                collection_name=self.collection_name,
-                log_message="Column search for Standard Deviation of Zero Failed. \
-                    Exited the get_columns_with_zero_std_deviation method of the Preprocessor class",
-            )
-
-            raise Exception(
-                f"Exception occured in Class : Preprocessor. \
-                Method : get_columns_with_zero_std_deviation, Error : {str(e)}"
+            self.log_writer.raise_exception_log(
+                error=e,
+                class_name=self.class_name,
+                method_name=method_name,
+                table_name=self.table_name,
             )

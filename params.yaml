@@ -99,10 +99,9 @@ model_params:
       - 200
     
 mlflow_config:
-  experiment_name : wafer-ops-test
+  experiment_name : climate-ops
   run_name : mlops
   serialization_format : cloudpickle  
-  num_of_prod_models : 3
 
 db_log:
   db_train_log : wafer_training_logs

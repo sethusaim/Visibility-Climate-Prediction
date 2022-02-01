@@ -4,9 +4,10 @@ from utils.main_utils import convert_object_to_dataframe
 from utils.read_params import read_params
 
 
-class data_transform_train:
+class Data_Transform_Train:
     """
     Description :  This class shall be used for transforming the training batch data before loading it in Database!!.
+
     Version     :   1.0
     Revisions   :   None
     """
@@ -14,7 +15,7 @@ class data_transform_train:
     def __init__(self):
         self.config = read_params()
 
-        self.train_data_bucket = self.config["s3_bucket"]["climate_train_data_bucket"]
+        self.train_data_bucket = self.config["s3_bucket"]["scania_train_data_bucket"]
 
         self.s3_obj = S3_Operations()
 
@@ -24,14 +25,13 @@ class data_transform_train:
 
         self.class_name = self.__class__.__name__
 
-        self.db_name = self.config["db_log"]["db_train_log"]
-
         self.train_data_transform_log = self.config["train_db_log"]["data_transform"]
 
     def add_quotes_to_string(self):
         """
         Method Name :   add_quotes_to_string
         Description :   This method addes the quotes to the string data present in columns
+
         Version     :   1.2
         Revisions   :   moved setup to cloud
         """
@@ -41,16 +41,14 @@ class data_transform_train:
             key="start",
             class_name=self.class_name,
             method_name=method_name,
-            db_name=self.db_name,
-            collection_name=self.train_data_transform_log,
+            table_name=self.train_data_transform_log,
         )
 
         try:
             csv_file_objs = self.s3_obj.get_file_objects_from_s3(
                 bucket=self.train_data_bucket,
                 filename=self.good_train_data_dir,
-                db_name=self.db_name,
-                collection_name=self.train_data_transform_log,
+                table_name=self.train_data_transform_log,
             )
 
             for f in csv_file_objs:
@@ -61,15 +59,19 @@ class data_transform_train:
                 if file.endswith(".csv"):
                     df = convert_object_to_dataframe(
                         obj=f,
-                        db_name=self.db_name,
-                        collection_name=self.train_data_transform_log,
+                        table_name=self.train_data_transform_log,
                     )
 
-                    df["DATE"] = df["DATE"].apply(lambda x: "'" + str(x) + "'")
+                    df["class"] = df["class"].apply(lambda x: "'" + str(x) + "'")
+
+                    for column in df.columns:
+                        count = df[column][df[column] == "na"].count()
+
+                        if count != 0:
+                            df[column] = df[column].replace("na", "'na'")
 
                     self.log_writer.log(
-                        db_name=self.db_name,
-                        collection_name=self.train_data_transform_log,
+                        table_name=self.train_data_transform_log,
                         log_message=f"Quotes added for the file {file}",
                     )
 
@@ -78,8 +80,7 @@ class data_transform_train:
                         file_name=abs_f,
                         bucket=self.train_data_bucket,
                         dest_file_name=file,
-                        db_name=self.db_name,
-                        collection_name=self.train_data_transform_log,
+                        table_name=self.train_data_transform_log,
                     )
 
                 else:
@@ -89,8 +90,7 @@ class data_transform_train:
                 key="exit",
                 class_name=self.class_name,
                 method_name=method_name,
-                db_name=self.db_name,
-                collection_name=self.train_data_transform_log,
+                table_name=self.train_data_transform_log,
             )
 
         except Exception as e:
@@ -98,6 +98,5 @@ class data_transform_train:
                 error=e,
                 class_name=self.class_name,
                 method_name=method_name,
-                db_name=self.db_name,
-                collection_name=self.train_data_transform_log,
+                table_name=self.train_data_transform_log,
             )

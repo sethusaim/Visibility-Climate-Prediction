@@ -1,6 +1,6 @@
 from sklearn.ensemble import RandomForestRegressor
 from utils.logger import App_Logger
-from utils.model_utils import get_best_params_for_model, get_best_score_for_model
+from utils.model_utils import get_model_name, get_model_params, get_model_score
 from utils.read_params import read_params
 from xgboost import XGBRegressor
 
@@ -13,10 +13,8 @@ class Model_Finder:
     Revisions: None
     """
 
-    def __init__(self, db_name, collection_name):
-        self.db_name = db_name
-
-        self.collection_name = collection_name
+    def __init__(self, table_name):
+        self.table_name = table_name
 
         self.class_name = self.__class__.__name__
 
@@ -41,8 +39,8 @@ class Model_Finder:
         On Failure  :   Raise Exception
 
         Written By  :   iNeuron Intelligence
-        Version     :   1.0
-        Revisions   :   None
+        Version     :   1.2
+        Revisions   :   moved setup to cloud
         """
         method_name = self.get_best_model_for_random_forest.__name__
 
@@ -50,18 +48,20 @@ class Model_Finder:
             key="start",
             class_name=self.class_name,
             method_name=method_name,
-            db_name=self.db_name,
-            collection_name=self.collection_name,
+            table_name=self.table_name,
         )
 
         try:
-            self.rf_best_params = get_best_params_for_model(
+            self.rf_model_name = get_model_name(
+                model=self.rf_model, table_name=self.table_name
+            )
+
+            self.rf_best_params = get_model_params(
                 model=self.rf_model,
                 model_key_name="rf_model",
                 x_train=train_x,
                 y_train=train_y,
-                db_name=self.db_name,
-                collection_name=self.collection_name,
+                table_name=self.table_name,
             )
 
             self.criterion = self.rf_best_params["criterion"]
@@ -73,9 +73,8 @@ class Model_Finder:
             self.n_estimators = self.rf_best_params["n_estimators"]
 
             self.log_writer.log(
-                db_name=self.db_name,
-                collection_name=self.collection_name,
-                log_message=f"{self.rf_model.__class__.__name__} model best params are {self.rf_best_params}",
+                table_name=self.table_name,
+                log_message=f"{self.rf_model_name} model best params are {self.rf_best_params}",
             )
 
             rf_model = RandomForestRegressor(
@@ -86,25 +85,22 @@ class Model_Finder:
             )
 
             self.log_writer.log(
-                db_name=self.db_name,
-                collection_name=self.collection_name,
-                log_message=f"Initialized {rf_model.__class__.__name__} with {self.rf_best_params} as params",
+                table_name=self.table_name,
+                log_message=f"Initialized {self.rf_model_name} with {self.rf_best_params} as params",
             )
 
             rf_model.fit(train_x, train_y)
 
             self.log_writer.log(
-                db_name=self.db_name,
-                collection_name=self.collection_name,
-                log_message=f"Created {rf_model.__class__.__name__} based on the {self.rf_best_params} as params",
+                table_name=self.table_name,
+                log_message=f"Created {self.rf_model_name} based on the {self.rf_best_params} as params",
             )
 
             self.log_writer.start_log(
                 key="exit",
                 class_name=self.class_name,
                 method_name=method_name,
-                db_name=self.db_name,
-                collection_name=self.collection_name,
+                table_name=self.table_name,
             )
 
             return rf_model
@@ -114,8 +110,7 @@ class Model_Finder:
                 error=e,
                 class_name=self.class_name,
                 method_name=method_name,
-                db_name=self.db_name,
-                collection_name=self.collection_name,
+                table_name=self.table_name,
             )
 
     def get_best_params_for_xgboost(self, train_x, train_y):
@@ -127,8 +122,8 @@ class Model_Finder:
         On Failure  :   Raise Exception
 
         Written By  :   iNeuron Intelligence
-        Version     :   1.0
-        Revisions   :   None
+        Version     :   1.2
+        Revisions   :   moved setup to cloud
         """
         method_name = self.get_best_params_for_xgboost.__name__
 
@@ -136,19 +131,20 @@ class Model_Finder:
             key="start",
             class_name=self.class_name,
             method_name=method_name,
-            db_name=self.db_name,
-            collection_name=self.collection_name,
+            table_name=self.table_name,
         )
 
         try:
+            self.xgb_model_name = get_model_name(
+                model=self.xgb_model, table_name=self.table_name
+            )
 
-            self.xgb_best_params = get_best_params_for_model(
+            self.xgb_best_params = get_model_params(
                 model=self.xgb_model,
                 model_key_name="xgb_model",
                 x_train=train_x,
                 y_train=train_y,
-                db_name=self.db_name,
-                collection_name=self.collection_name,
+                table_name=self.table_name,
             )
 
             self.learning_rate = self.xgb_best_params["learning_rate"]
@@ -158,9 +154,8 @@ class Model_Finder:
             self.n_estimators = self.rf_best_params["n_estimators"]
 
             self.log_writer.log(
-                db_name=self.db_name,
-                collection_name=self.collection_name,
-                log_message=f"{self.rf_model.__class__.__name__} model best params are {self.rf_best_params}",
+                table_name=self.table_name,
+                log_message=f"{self.xgb_model} model best params are {self.xgb_best_params}",
             )
 
             xgb_model = XGBRegressor(
@@ -170,36 +165,32 @@ class Model_Finder:
             )
 
             self.log_writer.log(
-                db_name=self.db_name,
-                collection_name=self.collection_name,
-                log_message=f"Initialized {self.xgb_model.__class__.__name__} model with best params as {self.xgb_best_params}",
+                table_name=self.table_name,
+                log_message=f"Initialized {self.xgb_model_name} model with best params as {self.xgb_best_params}",
             )
 
             xgb_model.fit(train_x, train_y)
 
             self.log_writer.log(
-                db_name=self.db_name,
-                collection_name=self.collection_name,
-                log_message=f"Created {self.xgb_model.__class__.__name__} model with best params as {self.xgb_best_params}",
+                table_name=self.table_name,
+                log_message=f"Created {self.xgb_model_name} model with best params as {self.xgb_best_params}",
             )
 
             self.log_writer.start_log(
                 key="exit",
                 class_name=self.class_name,
                 method_name=method_name,
-                db_name=self.db_name,
-                collection_name=self.collection_name,
+                table_name=self.table_name,
             )
 
             return xgb_model
 
         except Exception as e:
-            self.log_writer.start_log(
-                key="exit",
+            self.log_writer.raise_exception_log(
+                error=e,
                 class_name=self.class_name,
                 method_name=method_name,
-                db_name=self.db_name,
-                collection_name=self.collection_name,
+                table_name=self.table_name,
             )
 
     def get_trained_models(self, train_x, train_y, test_x, test_y):
@@ -210,8 +201,8 @@ class Model_Finder:
         On Failure  :   Raise Exception
 
         Written By  :   iNeuron Intelligence
-        Version     :   1.0
-        Revisions   :   None
+        Version     :   1.2
+        Revisions   :   moved setup to cloud
         """
         method_name = self.get_trained_models.__name__
 
@@ -219,37 +210,33 @@ class Model_Finder:
             key="start",
             class_name=self.class_name,
             method_name=method_name,
-            db_name=self.db_name,
-            collection_name=self.collection_name,
+            table_name=self.table_name,
         )
 
         try:
             xgb_model = self.get_best_params_for_xgboost(train_x, train_y)
 
-            xgb_model_score = get_best_score_for_model(
+            xgb_model_score = get_model_score(
                 model=xgb_model,
                 test_x=test_x,
                 test_y=test_y,
-                db_name=self.db_name,
-                collection_name=self.collection_name,
+                table_name=self.table_name,
             )
 
             rf_model = self.get_best_model_for_random_forest(train_x, train_y)
 
-            rf_model_score = get_best_score_for_model(
+            rf_model_score = get_model_score(
                 model=rf_model,
                 test_x=test_x,
                 test_y=test_y,
-                db_name=self.db_name,
-                collection_name=self.collection_name,
+                table_name=self.table_name,
             )
 
             self.log_writer.start_log(
                 key="exit",
                 class_name=self.class_name,
                 method_name=method_name,
-                db_name=self.db_name,
-                collection_name=self.collection_name,
+                table_name=self.table_name,
             )
 
             return xgb_model, xgb_model_score, rf_model, rf_model_score

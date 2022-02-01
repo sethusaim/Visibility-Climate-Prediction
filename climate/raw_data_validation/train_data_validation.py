@@ -6,7 +6,7 @@ from utils.main_utils import convert_object_to_dataframe
 from utils.read_params import read_params
 
 
-class raw_train_data_validation:
+class Raw_train_Data_Validation:
     """
     Description :   This method is used for validating the raw training data
 
@@ -25,13 +25,11 @@ class raw_train_data_validation:
 
         self.s3_obj = S3_Operations()
 
-        self.train_data_bucket = self.config["s3_bucket"]["climate_train_data_bucket"]
+        self.train_data_bucket = self.config["s3_bucket"]["scania_train_data_bucket"]
 
         self.input_files_bucket = self.config["s3_bucket"]["input_files_bucket"]
 
         self.raw_train_data_dir = self.config["data"]["raw_data"]["train_batch"]
-
-        self.db_name = self.config["db_log"]["db_train_log"]
 
         self.train_schema_file = self.config["schema_file"]["train_schema_file"]
 
@@ -54,7 +52,7 @@ class raw_train_data_validation:
     def values_from_schema(self):
         """
         Method Name :   values_from_schema
-        Description :   This method is used for getting values from schema_training.json
+        Description :   This method is used for getting values from schema_trainiction.json
 
         Version     :   1.2
         Revisions   :   moved setup to cloud
@@ -66,15 +64,13 @@ class raw_train_data_validation:
                 key="start",
                 class_name=self.class_name,
                 method_name=method_name,
-                db_name=self.db_name,
-                collection_name=self.train_schema_log,
+                table_name=self.train_schema_log,
             )
 
             dic = self.s3_obj.get_schema_from_s3(
                 bucket=self.input_files_bucket,
                 filename=self.train_schema_file,
-                db_name=self.db_name,
-                collection_name=self.train_schema_log,
+                table_name=self.train_schema_log,
             )
 
             LengthOfDateStampInFile = dic["LengthOfDateStampInFile"]
@@ -95,8 +91,7 @@ class raw_train_data_validation:
             )
 
             self.log_writer.log(
-                db_name=self.db_name,
-                collection_name=self.train_schema_log,
+                table_name=self.train_schema_log,
                 log_message=message,
             )
 
@@ -104,15 +99,7 @@ class raw_train_data_validation:
                 key="exit",
                 class_name=self.class_name,
                 method_name=method_name,
-                db_name=self.db_name,
-                collection_name=self.train_schema_log,
-            )
-
-            return (
-                LengthOfDateStampInFile,
-                LengthOfTimeStampInFile,
-                column_names,
-                NumberofColumns,
+                table_name=self.train_schema_log,
             )
 
         except Exception as e:
@@ -120,9 +107,15 @@ class raw_train_data_validation:
                 error=e,
                 class_name=self.class_name,
                 method_name=method_name,
-                db_name=self.db_name,
-                collection_name=self.train_schema_log,
+                table_name=self.train_schema_log,
             )
+
+        return (
+            LengthOfDateStampInFile,
+            LengthOfTimeStampInFile,
+            column_names,
+            NumberofColumns,
+        )
 
     def get_regex_pattern(self):
         """
@@ -139,15 +132,13 @@ class raw_train_data_validation:
                 key="start",
                 class_name=self.class_name,
                 method_name=method_name,
-                db_name=self.db_name,
-                collection_name=self.train_gen_log,
+                table_name=self.train_gen_log,
             )
 
-            regex = "['visibility']+['\_'']+[\d_]+[\d]+\.csv"
+            regex = "['apsfailure']+['\_'']+[\d_]+[\d]+\.csv"
 
             self.log_writer.log(
-                db_name=self.db_name,
-                collection_name=self.train_gen_log,
+                table_name=self.train_gen_log,
                 log_message=f"Got {regex} pattern",
             )
 
@@ -155,8 +146,7 @@ class raw_train_data_validation:
                 key="exit",
                 class_name=self.class_name,
                 method_name=method_name,
-                db_name=self.db_name,
-                collection_name=self.train_gen_log,
+                table_name=self.train_gen_log,
             )
 
             return regex
@@ -166,8 +156,7 @@ class raw_train_data_validation:
                 error=e,
                 class_name=self.class_name,
                 method_name=method_name,
-                db_name=self.db_name,
-                collection_name=self.train_gen_log,
+                table_name=self.train_gen_log,
             )
 
     def validate_raw_file_name(
@@ -182,32 +171,29 @@ class raw_train_data_validation:
         """
         method_name = self.validate_raw_file_name.__name__
 
-        try:
-            self.log_writer.start_log(
-                key="start",
-                class_name=self.class_name,
-                method_name=method_name,
-                db_name=self.db_name,
-                collection_name=self.train_name_valid_log,
-            )
+        self.log_writer.start_log(
+            key="start",
+            class_name=self.class_name,
+            method_name=method_name,
+            table_name=self.train_name_valid_log,
+        )
 
+        try:
             self.s3_obj.create_dirs_for_good_bad_data(
-                db_name=self.db_name, collection_name=self.train_name_valid_log
+                table_name=self.train_name_valid_log
             )
 
             onlyfiles = self.s3_obj.get_files_from_s3(
                 bucket=self.raw_data_bucket_name,
                 folder_name=self.raw_train_data_dir,
-                db_name=self.db_name,
-                collection_name=self.train_name_valid_log,
+                table_name=self.train_name_valid_log,
             )
 
             train_batch_files = [f.split("/")[1] for f in onlyfiles]
 
             self.log_writer.log(
-                db_name=self.db_name,
-                collection_name=self.train_name_valid_log,
-                log_message="Got train batch files without path",
+                table_name=self.train_name_valid_log,
+                log_message="Got trainiction files with exact name",
             )
 
             for filename in train_batch_files:
@@ -216,6 +202,11 @@ class raw_train_data_validation:
                 good_data_train_filename = self.good_train_data_dir + "/" + filename
 
                 bad_data_train_filename = self.bad_train_data_dir + "/" + filename
+
+                self.log_writer.log(
+                    table_name=self.train_name_valid_log,
+                    log_message="Created raw,good and bad data filenames",
+                )
 
                 if re.match(regex, filename):
                     splitAtDot = re.split(".csv", filename)
@@ -229,8 +220,7 @@ class raw_train_data_validation:
                                 src_file=raw_data_train_filename,
                                 dest_bucket=self.train_data_bucket,
                                 dest_file=good_data_train_filename,
-                                db_name=self.db_name,
-                                collection_name=self.train_name_valid_log,
+                                table_name=self.train_name_valid_log,
                             )
 
                         else:
@@ -239,8 +229,7 @@ class raw_train_data_validation:
                                 src_file=raw_data_train_filename,
                                 dest_bucket=self.train_data_bucket,
                                 dest_file=bad_data_train_filename,
-                                db_name=self.db_name,
-                                collection_name=self.train_name_valid_log,
+                                table_name=self.train_name_valid_log,
                             )
 
                     else:
@@ -249,8 +238,7 @@ class raw_train_data_validation:
                             src_file=raw_data_train_filename,
                             dest_bucket=self.train_data_bucket,
                             dest_file=bad_data_train_filename,
-                            db_name=self.db_name,
-                            collection_name=self.train_name_valid_log,
+                            table_name=self.train_name_valid_log,
                         )
 
                 else:
@@ -259,16 +247,14 @@ class raw_train_data_validation:
                         src_file=raw_data_train_filename,
                         dest_bucket=self.train_data_bucket,
                         dest_file=bad_data_train_filename,
-                        db_name=self.db_name,
-                        collection_name=self.train_name_valid_log,
+                        table_name=self.train_name_valid_log,
                     )
 
             self.log_writer.start_log(
                 key="exit",
                 class_name=self.class_name,
                 method_name=method_name,
-                db_name=self.db_name,
-                collection_name=self.train_name_valid_log,
+                table_name=self.train_name_valid_log,
             )
 
         except Exception as e:
@@ -276,8 +262,7 @@ class raw_train_data_validation:
                 error=e,
                 class_name=self.class_name,
                 method_name=method_name,
-                db_name=self.db_name,
-                collection_name=self.train_name_valid_log,
+                table_name=self.train_name_valid_log,
             )
 
     def validate_col_length(self, NumberofColumns):
@@ -290,20 +275,18 @@ class raw_train_data_validation:
         """
         method_name = self.validate_col_length.__name__
 
-        try:
-            self.log_writer.start_log(
-                key="start",
-                class_name=self.class_name,
-                method_name=method_name,
-                db_name=self.db_name,
-                collection_name=self.train_col_valid_log,
-            )
+        self.log_writer.start_log(
+            key="start",
+            class_name=self.class_name,
+            method_name=method_name,
+            table_name=self.train_col_valid_log,
+        )
 
+        try:
             csv_file_objs = self.s3_obj.get_file_objects_from_s3(
                 bucket=self.train_data_bucket,
                 filename=self.good_train_data_dir,
-                db_name=self.db_name,
-                collection_name=self.train_col_valid_log,
+                table_name=self.train_col_valid_log,
             )
 
             for f in csv_file_objs:
@@ -314,8 +297,7 @@ class raw_train_data_validation:
                 if file.endswith(".csv"):
                     csv = convert_object_to_dataframe(
                         f,
-                        db_name=self.db_name,
-                        collection_name=self.train_col_valid_log,
+                        table_name=self.train_col_valid_log,
                     )
 
                     if csv.shape[1] == NumberofColumns:
@@ -329,8 +311,7 @@ class raw_train_data_validation:
                             src_file=file,
                             dest_bucket=self.train_data_bucket,
                             dest_file=dest_f,
-                            db_name=self.db_name,
-                            collection_name=self.train_col_valid_log,
+                            table_name=self.train_col_valid_log,
                         )
 
                 else:
@@ -340,8 +321,7 @@ class raw_train_data_validation:
                 key="exit",
                 class_name=self.class_name,
                 method_name=method_name,
-                db_name=self.db_name,
-                collection_name=self.train_col_valid_log,
+                table_name=self.train_col_valid_log,
             )
 
         except Exception as e:
@@ -349,8 +329,7 @@ class raw_train_data_validation:
                 error=e,
                 class_name=self.class_name,
                 method_name=method_name,
-                db_name=self.db_name,
-                collection_name=self.train_col_valid_log,
+                table_name=self.train_col_valid_log,
             )
 
     def validate_missing_values_in_col(self):
@@ -363,20 +342,18 @@ class raw_train_data_validation:
         """
         method_name = self.validate_missing_values_in_col.__name__
 
-        try:
-            self.log_writer.start_log(
-                key="start",
-                class_name=self.class_name,
-                method_name=method_name,
-                db_name=self.db_name,
-                collection_name=self.train_missing_value_log,
-            )
+        self.log_writer.start_log(
+            key="start",
+            class_name=self.class_name,
+            method_name=method_name,
+            table_name=self.train_missing_value_log,
+        )
 
+        try:
             csv_file_objs = self.s3_obj.get_file_objects_from_s3(
                 bucket=self.train_data_bucket,
                 filename=self.good_train_data_dir,
-                db_name=self.db_name,
-                collection_name=self.train_missing_value_log,
+                table_name=self.train_missing_value_log,
             )
 
             for f in csv_file_objs:
@@ -387,8 +364,7 @@ class raw_train_data_validation:
                 if abs_f.endswith(".csv"):
                     csv = convert_object_to_dataframe(
                         f,
-                        db_name=self.db_name,
-                        collection_name=self.train_missing_value_log,
+                        table_name=self.train_missing_value_log,
                     )
 
                     count = 0
@@ -404,8 +380,7 @@ class raw_train_data_validation:
                                 src_file=file,
                                 dest_bucket=self.train_data_bucket,
                                 dest_file=dest_f,
-                                db_name=self.db_name,
-                                collection_name=self.train_missing_value_log,
+                                table_name=self.train_missing_value_log,
                             )
 
                             break
@@ -418,8 +393,7 @@ class raw_train_data_validation:
                             file_name=abs_f,
                             bucket=self.train_data_bucket,
                             dest_file_name=dest_f,
-                            db_name=self.db_name,
-                            collection_name=self.train_missing_value_log,
+                            table_name=self.train_missing_value_log,
                         )
 
                 else:
@@ -429,8 +403,7 @@ class raw_train_data_validation:
                     key="exit",
                     class_name=self.class_name,
                     method_name=method_name,
-                    db_name=self.db_name,
-                    collection_name=self.train_missing_value_log,
+                    table_name=self.train_missing_value_log,
                 )
 
         except Exception as e:
@@ -438,6 +411,5 @@ class raw_train_data_validation:
                 error=e,
                 class_name=self.class_name,
                 method_name=method_name,
-                db_name=self.db_name,
-                collection_name=self.train_missing_value_log,
+                table_name=self.train_missing_value_log,
             )
