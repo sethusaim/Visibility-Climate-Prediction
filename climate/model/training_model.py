@@ -178,7 +178,7 @@ class Train_Model:
                         self.mlflow_op.log_all_for_model(
                             idx=i,
                             model=ada_model,
-                            model_param_name="adaboost_model",
+                            model_param_name="rf_model",
                             model_score=ada_model_score,
                         )
 

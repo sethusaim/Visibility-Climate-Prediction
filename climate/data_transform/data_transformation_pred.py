@@ -7,14 +7,15 @@ from utils.read_params import read_params
 class Data_Transform_Pred:
     """
     Description :  This class shall be used for transforming the prediction batch data before loading it in Database!!.
-    Version     :   1.2
-    Revisions   :   moved setup to cloud
+
+    Version     :   1.0
+    Revisions   :   None
     """
 
     def __init__(self):
         self.config = read_params()
 
-        self.pred_data_bucket = self.config["s3_bucket"]["climate_pred_data_bucket"]
+        self.pred_data_bucket = self.config["s3_bucket"]["scania_pred_data_bucket"]
 
         self.s3_obj = S3_Operations()
 
@@ -24,14 +25,13 @@ class Data_Transform_Pred:
 
         self.class_name = self.__class__.__name__
 
-        self.db_name = self.config["db_log"]["db_pred_log"]
-
         self.pred_data_transform_log = self.config["pred_db_log"]["data_transform"]
 
     def add_quotes_to_string(self):
         """
         Method Name :   add_quotes_to_string
         Description :   This method addes the quotes to the string data present in columns
+
         Version     :   1.2
         Revisions   :   moved setup to cloud
         """

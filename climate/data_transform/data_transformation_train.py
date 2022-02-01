@@ -62,13 +62,7 @@ class Data_Transform_Train:
                         table_name=self.train_data_transform_log,
                     )
 
-                    df["class"] = df["class"].apply(lambda x: "'" + str(x) + "'")
-
-                    for column in df.columns:
-                        count = df[column][df[column] == "na"].count()
-
-                        if count != 0:
-                            df[column] = df[column].replace("na", "'na'")
+                    df["DATE"] = df["DATE"].apply(lambda x: "'" + str(x) + "'")
 
                     self.log_writer.log(
                         table_name=self.train_data_transform_log,

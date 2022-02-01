@@ -1,4 +1,4 @@
-from climate.mongo_db_operations.db_operations import MongoDB_Operation
+from climate.mongo_db_operations.mongo_operations import MongoDB_Operation
 from climate.s3_bucket_operations.s3_operations import S3_Operations
 from utils.logger import App_Logger
 from utils.main_utils import convert_object_to_dataframe
