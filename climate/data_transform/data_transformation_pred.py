@@ -1,10 +1,9 @@
-from climate.s3_bucket_operations.s3_operations import S3_Operations
+from climate.s3_bucket_operations.s3_operations import s3_operations
 from utils.logger import App_Logger
-from utils.main_utils import convert_object_to_dataframe
 from utils.read_params import read_params
 
 
-class Data_Transform_Pred:
+class data_transform_pred:
     """
     Description :  This class shall be used for transforming the prediction batch data before loading it in Database!!.
 
@@ -17,7 +16,7 @@ class Data_Transform_Pred:
 
         self.pred_data_bucket = self.config["s3_bucket"]["scania_pred_data_bucket"]
 
-        self.s3_obj = S3_Operations()
+        self.s3 = s3_operations()
 
         self.log_writer = App_Logger()
 
@@ -45,23 +44,21 @@ class Data_Transform_Pred:
         )
 
         try:
-            csv_file_objs = self.s3_obj.get_file_objects_from_s3(
+            lst = self.s3.read_csv(
                 bucket=self.pred_data_bucket,
-                filename=self.good_pred_data_dir,
+                file_name=self.good_pred_data_dir,
+                folder=True,
                 table_name=self.pred_data_transform_log,
             )
 
-            for f in csv_file_objs:
-                file = f.key
+            for idx, f in enumerate(lst):
+                df = f[idx][0]
 
-                abs_f = file.split("/")[-1]
+                file = f[idx][1]
+
+                abs_f = f[idx][2]
 
                 if file.endswith(".csv"):
-                    df = convert_object_to_dataframe(
-                        obj=f,
-                        table_name=self.pred_data_transform_log,
-                    )
-
                     df["DATE"] = df["DATE"].apply(lambda x: "'" + str(x) + "'")
 
                     self.log_writer.log(
@@ -69,7 +66,7 @@ class Data_Transform_Pred:
                         log_message=f"Quotes added for the file {file}",
                     )
 
-                    self.s3_obj.upload_df_as_csv_to_s3(
+                    self.s3.upload_df_as_csv(
                         data_frame=df,
                         file_name=abs_f,
                         bucket=self.pred_data_bucket,
@@ -88,7 +85,7 @@ class Data_Transform_Pred:
             )
 
         except Exception as e:
-            self.log_writer.raise_exception_log(
+            self.log_writer.exception_log(
                 error=e,
                 class_name=self.class_name,
                 method_name=method_name,

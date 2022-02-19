@@ -1,24 +1,24 @@
-from climate.data_transform.data_transformation_train import Data_Transform_Train
-from climate.data_type_valid.data_type_valid_train import DB_Operation_Train
-from climate.raw_data_validation.train_data_validation import Raw_train_Data_Validation
+from climate.data_transform.data_transformation_train import data_transform_train
+from climate.data_type_valid.data_type_valid_train import db_operation_train
+from climate.raw_data_validation.train_data_validation import raw_train_data_validation
 from utils.logger import App_Logger
 from utils.read_params import read_params
 
 
-class Train_Validation:
+class train_validation:
     """
-    Description :   This class is used for validating all the trainiction batch files
+    Description :   This class is used for validating all the training batch files
 
     Version     :   1.2
     Revisions   :   moved to setup to cloud
     """
 
     def __init__(self, bucket_name):
-        self.raw_data = Raw_train_Data_Validation(raw_data_bucket_name=bucket_name)
+        self.raw_data = raw_train_data_validation(raw_data_bucket_name=bucket_name)
 
-        self.data_transform = Data_Transform_Train()
+        self.data_transform = data_transform_train()
 
-        self.db_operation = DB_Operation_Train()
+        self.db_operation = db_operation_train()
 
         self.config = read_params()
 
@@ -36,8 +36,8 @@ class Train_Validation:
 
     def training_validation(self):
         """
-        Method Name :   load_s3_obj
-        Description :   This method is used for validating the trainiction btach files
+        Method Name :   load_s3
+        Description :   This method is used for validating the training btach files
 
         Version     :   1.2
         Revisions   :   moved setup to cloud
@@ -109,7 +109,7 @@ class Train_Validation:
             )
 
         except Exception as e:
-            self.log_writer.raise_exception_log(
+            self.log_writer.exception_log(
                 error=e,
                 class_name=self.class_name,
                 method_name=method_name,

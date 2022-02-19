@@ -5,7 +5,7 @@ from utils.read_params import read_params
 from xgboost import XGBRegressor
 
 
-class Model_Finder:
+class model_finder:
     """
     This class shall  be used to find the model with best accuracy and AUC score.
     Written By: iNeuron Intelligence
@@ -106,7 +106,7 @@ class Model_Finder:
             return rf_model
 
         except Exception as e:
-            self.log_writer.raise_exception_log(
+            self.log_writer.exception_log(
                 error=e,
                 class_name=self.class_name,
                 method_name=method_name,
@@ -186,7 +186,7 @@ class Model_Finder:
             return xgb_model
 
         except Exception as e:
-            self.log_writer.raise_exception_log(
+            self.log_writer.exception_log(
                 error=e,
                 class_name=self.class_name,
                 method_name=method_name,
@@ -242,7 +242,7 @@ class Model_Finder:
             return xgb_model, xgb_model_score, rf_model, rf_model_score
 
         except Exception as e:
-            self.log_writer.raise_exception_log(
+            self.log_writer.exception_log(
                 error=e,
                 class_name=self.class_name,
                 method_name=method_name,

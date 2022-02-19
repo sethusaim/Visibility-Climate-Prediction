@@ -1,13 +1,13 @@
 import numpy as np
 import pandas as pd
-from climate.s3_bucket_operations.s3_operations import S3_Operations
+from climate.s3_bucket_operations.s3_operations import s3_operations
 from sklearn.impute import KNNImputer
 from sklearn.preprocessing import StandardScaler
 from utils.logger import App_Logger
 from utils.read_params import read_params
 
 
-class Preprocessor:
+class preprocessor:
     """
     Written By  :   iNeuron Intelligence
     Version     :   1.2
@@ -33,7 +33,7 @@ class Preprocessor:
 
         self.input_files_bucket = self.config["s3_bucket"]["input_files_bucket"]
 
-        self.s3_obj = S3_Operations()
+        self.s3 = s3_operations()
 
     def remove_columns(self, data, columns):
         """
@@ -80,7 +80,7 @@ class Preprocessor:
                 table_name=self.table_name, log_message="Column removal Unsuccessful"
             )
 
-            self.log_writer.raise_exception_log(
+            self.log_writer.exception_log(
                 error=e,
                 class_name=self.class_name,
                 method_name=method_name,
@@ -132,7 +132,7 @@ class Preprocessor:
                 log_message="Label Separation Unsuccessful",
             )
 
-            self.log_writer.raise_exception_log(
+            self.log_writer.exception_log(
                 error=e,
                 class_name=self.class_name,
                 method_name=method_name,
@@ -174,7 +174,7 @@ class Preprocessor:
             return data
 
         except Exception as e:
-            self.log_writer.raise_exception_log(
+            self.log_writer.exception_log(
                 error=e,
                 class_name=self.class_name,
                 method_name=method_name,
@@ -220,7 +220,7 @@ class Preprocessor:
             return data
 
         except Exception as e:
-            self.log_writer.raise_exception_log(
+            self.log_writer.exception_log(
                 error=e,
                 class_name=self.class_name,
                 method_name=method_name,
@@ -276,7 +276,7 @@ class Preprocessor:
                 log_message="Created data frame with null values",
             )
 
-            self.s3_obj.upload_df_as_csv_to_s3(
+            self.s3.upload_df_as_csv(
                 data_frame=self.dataframe_with_null,
                 file_name=self.null_values_file,
                 bucket=self.input_files_bucket,
@@ -298,7 +298,7 @@ class Preprocessor:
                 log_message="Finding missing values failed",
             )
 
-            self.log_writer.raise_exception_log(
+            self.log_writer.exception_log(
                 error=e,
                 class_name=self.class_name,
                 method_name=method_name,
@@ -344,7 +344,7 @@ class Preprocessor:
             return data
 
         except Exception as e:
-            self.log_writer.raise_exception_log(
+            self.log_writer.exception_log(
                 error=e,
                 class_name=self.class_name,
                 method_name=method_name,
@@ -391,7 +391,7 @@ class Preprocessor:
             return X_scaled
 
         except Exception as e:
-            self.log_writer.raise_exception_log(
+            self.log_writer.exception_log(
                 error=e,
                 class_name=self.class_name,
                 method_name=method_name,
@@ -463,7 +463,7 @@ class Preprocessor:
             return self.new_data
 
         except Exception as e:
-            self.log_writer.raise_exception_log(
+            self.log_writer.exception_log(
                 error=e,
                 class_name=self.class_name,
                 method_name=method_name,
@@ -520,7 +520,7 @@ class Preprocessor:
                 log_message="Column search for Standard Deviation of Zero Failed",
             )
 
-            self.log_writer.raise_exception_log(
+            self.log_writer.exception_log(
                 error=e,
                 class_name=self.class_name,
                 method_name=method_name,

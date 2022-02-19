@@ -1,11 +1,10 @@
 from climate.mongo_db_operations.mongo_operations import MongoDB_Operation
-from climate.s3_bucket_operations.s3_operations import S3_Operations
+from climate.s3_bucket_operations.s3_operations import s3_operations
 from utils.logger import App_Logger
-from utils.main_utils import convert_object_to_dataframe
 from utils.read_params import read_params
 
 
-class DB_Operation_Pred:
+class db_operation_pred:
     """
     Description :    This class shall be used for handling all the db operations
 
@@ -30,7 +29,7 @@ class DB_Operation_Pred:
 
         self.pred_export_csv_log = self.config["pred_db_log"]["export_csv"]
 
-        self.s3_obj = S3_Operations()
+        self.s3 = s3_operations()
 
         self.db_op = MongoDB_Operation()
 
@@ -54,21 +53,19 @@ class DB_Operation_Pred:
         )
 
         try:
-            csv_files = self.s3_obj.get_file_objects_from_s3(
+            lst = self.s3.read_csv(
                 bucket=self.pred_data_bucket,
-                filename=self.good_data_pred_dir,
+                file_name=self.good_data_pred_dir,
                 table_name=self.pred_db_insert_log,
+                folder=True,
             )
 
-            for f in csv_files:
-                file = f.key
+            for idx, f in enumerate(lst):
+                df = f[idx][1]
+
+                file = f[idx][2]
 
                 if file.endswith(".csv"):
-                    df = convert_object_to_dataframe(
-                        obj=f,
-                        table_name=self.pred_db_insert_log,
-                    )
-
                     self.db_op.insert_dataframe_as_record(
                         data_frame=df,
                         db_name=good_data_db_name,
@@ -92,7 +89,7 @@ class DB_Operation_Pred:
             )
 
         except Exception as e:
-            self.log_writer.raise_exception_log(
+            self.log_writer.exception_log(
                 error=e,
                 class_name=self.class_name,
                 method_name=method_name,
@@ -117,13 +114,13 @@ class DB_Operation_Pred:
         )
 
         try:
-            df = self.db_op.convert_collection_to_dataframe(
+            df = self.db_op.get_collection_as_dataframe(
                 db_name=good_data_db_name,
                 collection_name=good_data_collection_name,
                 table_name=self.pred_export_csv_log,
             )
 
-            self.s3_obj.upload_df_as_csv_to_s3(
+            self.s3.upload_df_as_csv(
                 data_frame=df,
                 file_name=self.pred_export_csv_file,
                 bucket=self.input_files_bucket,
@@ -139,7 +136,7 @@ class DB_Operation_Pred:
             )
 
         except Exception as e:
-            self.log_writer.raise_exception_log(
+            self.log_writer.exception_log(
                 error=e,
                 class_name=self.class_name,
                 method_name=method_name,

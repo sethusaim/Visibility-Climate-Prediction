@@ -1,14 +1,14 @@
 import os
 
 import mlflow
-from climate.s3_bucket_operations.s3_operations import S3_Operations
+from climate.s3_bucket_operations.s3_operations import s3_operations
 from mlflow.tracking import MlflowClient
 from utils.logger import App_Logger
 from utils.model_utils import get_model_name
 from utils.read_params import read_params
 
 
-class MLFlow_Operations:
+class mlflow_operations:
     """
     Description :    This class shall be used for handling all the mlflow operations
 
@@ -23,7 +23,7 @@ class MLFlow_Operations:
 
         self.log_writer = App_Logger()
 
-        self.s3_obj = S3_Operations()
+        self.s3 = s3_operations()
 
         self.table_name = table_name
 
@@ -72,7 +72,7 @@ class MLFlow_Operations:
             return exp
 
         except Exception as e:
-            self.log_writer.raise_exception_log(
+            self.log_writer.exception_log(
                 error=e,
                 class_name=self.class_name,
                 method_name=method_name,
@@ -114,7 +114,7 @@ class MLFlow_Operations:
             return runs
 
         except Exception as e:
-            self.log_writer.raise_exception_log(
+            self.log_writer.exception_log(
                 error=e,
                 class_name=self.class_name,
                 method_name=method_name,
@@ -154,7 +154,7 @@ class MLFlow_Operations:
             )
 
         except Exception as e:
-            self.log_writer.raise_exception_log(
+            self.log_writer.exception_log(
                 error=e,
                 class_name=self.class_name,
                 method_name=method_name,
@@ -196,7 +196,7 @@ class MLFlow_Operations:
             return client
 
         except Exception as e:
-            self.log_writer.raise_exception_log(
+            self.log_writer.exception_log(
                 error=e,
                 class_name=self.class_name,
                 method_name=method_name,
@@ -237,7 +237,7 @@ class MLFlow_Operations:
             return remote_server_uri
 
         except Exception as e:
-            self.log_writer.raise_exception_log(
+            self.log_writer.exception_log(
                 error=e,
                 class_name=self.class_name,
                 method_name=method_name,
@@ -279,7 +279,7 @@ class MLFlow_Operations:
             )
 
         except Exception as e:
-            self.log_writer.raise_exception_log(
+            self.log_writer.exception_log(
                 error=e,
                 class_name=self.class_name,
                 method_name=method_name,
@@ -325,7 +325,7 @@ class MLFlow_Operations:
             return reg_model_names
 
         except Exception as e:
-            self.log_writer.raise_exception_log(
+            self.log_writer.exception_log(
                 error=e,
                 class_name=self.class_name,
                 method_name=method_name,
@@ -371,7 +371,7 @@ class MLFlow_Operations:
             return results
 
         except Exception as e:
-            self.log_writer.raise_exception_log(
+            self.log_writer.exception_log(
                 error=e,
                 class_name=self.class_name,
                 method_name=method_name,
@@ -415,7 +415,7 @@ class MLFlow_Operations:
             )
 
         except Exception as e:
-            self.log_writer.raise_exception_log(
+            self.log_writer.exception_log(
                 error=e,
                 class_name=self.class_name,
                 method_name=method_name,
@@ -455,7 +455,7 @@ class MLFlow_Operations:
             )
 
         except Exception as e:
-            self.log_writer.raise_exception_log(
+            self.log_writer.exception_log(
                 error=e,
                 class_name=self.class_name,
                 method_name=method_name,
@@ -496,7 +496,7 @@ class MLFlow_Operations:
             )
 
         except Exception as e:
-            self.log_writer.raise_exception_log(
+            self.log_writer.exception_log(
                 error=e,
                 class_name=self.class_name,
                 method_name=method_name,
@@ -559,7 +559,7 @@ class MLFlow_Operations:
             )
 
         except Exception as e:
-            self.log_writer.raise_exception_log(
+            self.log_writer.exception_log(
                 error=e,
                 class_name=self.class_name,
                 method_name=method_name,
@@ -624,7 +624,7 @@ class MLFlow_Operations:
                     log_message=f"Transitioned {model_name} to {stage} in mlflow",
                 )
 
-                self.s3_obj.copy_data_to_other_bucket(
+                self.s3.copy_data(
                     src_bucket=bucket,
                     src_file=trained_model_file,
                     dest_bucket=bucket,
@@ -647,7 +647,7 @@ class MLFlow_Operations:
                     log_message=f"Transitioned {model_name} to {stage} in mlflow",
                 )
 
-                self.s3_obj.copy_data_to_other_bucket(
+                self.s3.copy_data(
                     src_bucket=bucket,
                     src_file=trained_model_file,
                     dest_bucket=bucket,
@@ -669,7 +669,7 @@ class MLFlow_Operations:
             )
 
         except Exception as e:
-            self.log_writer.raise_exception_log(
+            self.log_writer.exception_log(
                 error=e,
                 class_name=self.class_name,
                 method_name=method_name,

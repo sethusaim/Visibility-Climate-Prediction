@@ -44,7 +44,7 @@ def get_model_name(model, table_name):
         return model_name
 
     except Exception as e:
-        log_writer.raise_exception_log(
+        log_writer.exception_log(
             error=e,
             class_name=__file__,
             method_name=method_name,
@@ -94,7 +94,7 @@ def get_model_param_grid(model_key_name, table_name):
         return model_grid
 
     except Exception as e:
-        log_writer.raise_exception_log(
+        log_writer.exception_log(
             error=e,
             class_name=__file__,
             method_name=method_name,
@@ -155,7 +155,7 @@ def get_model_score(model, test_x, test_y, table_name):
         return model_score
 
     except Exception as e:
-        log_writer.raise_exception_log(
+        log_writer.exception_log(
             error=e,
             class_name=__file__,
             method_name=method_name,
@@ -223,7 +223,7 @@ def get_model_params(model, model_key_name, x_train, y_train, table_name):
         return model_grid.best_params_
 
     except Exception as e:
-        log_writer.raise_exception_log(
+        log_writer.exception_log(
             error=e,
             class_name=__file__,
             method_name=method_name,
