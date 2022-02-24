@@ -22,9 +22,9 @@ data:
 
 mongodb:
   mongo_url: 
-  wafer_data_db_name: wafer-data
-  wafer_train_data_collection: wafer-train-data
-  wafer_pred_data_collection: wafer-pred-data
+  climate_data_db_name: climate-data
+  climate_train_data_collection: climate-train-data
+  climate_pred_data_collection: climate-pred-data
 
 knn_imputer:
   n_neighbors : 3
@@ -40,11 +40,11 @@ kmeans_cluster:
 
 s3_bucket:
   input_files_bucket: input-files-for-train-and-pred
-  wafer_model_bucket: wafer-model
-  wafer-mlflow_bucket: wafer-mlflow
-  wafer_pred_data_bucket: wafer-pred-data
-  wafer_train_data_bucket: wafer-train-data
-  wafer_raw_data_bucket: wafer-raw-data
+  climate_model_bucket: climate-model
+  climate-mlflow_bucket: climate-mlflow
+  climate_pred_data_bucket: climate-pred-data
+  climate_train_data_bucket: climate-train-data
+  climate_raw_data_bucket: climate-raw-data
 
 models_dir:
   trained : trained/
@@ -104,8 +104,8 @@ mlflow_config:
   serialization_format : cloudpickle  
 
 db_log:
-  db_train_log : wafer_training_logs
-  db_pred_log : wafer_prediction_logs
+  db_train_log : climate_training_logs
+  db_pred_log : climate_prediction_logs
 
 train_db_log:
   model_training : modelTrainingLog

@@ -14,7 +14,7 @@ class data_transform_pred:
     def __init__(self):
         self.config = read_params()
 
-        self.pred_data_bucket = self.config["s3_bucket"]["scania_pred_data_bucket"]
+        self.pred_data_bucket = self.config["s3_bucket"]["climate_pred_data_bucket"]
 
         self.s3 = s3_operations()
 
