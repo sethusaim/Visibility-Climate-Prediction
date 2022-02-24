@@ -1,10 +1,10 @@
 from sklearn.metrics import accuracy_score, roc_auc_score
 from sklearn.model_selection import GridSearchCV
 
-from utils.logger import App_Logger
+from utils.logger import app_logger
 from utils.read_params import read_params
 
-log_writer = App_Logger()
+log_writer = app_logger()
 
 config = read_params()
 
@@ -15,7 +15,7 @@ def get_model_name(model, table_name):
     Description :   This method is used for getting the actual model name
 
     Version     :   1.2
-    Revisions   :   moved setup to cloud
+    Revisions   :   Moved to setup to cloud
     """
     method_name = get_model_name.__name__
 

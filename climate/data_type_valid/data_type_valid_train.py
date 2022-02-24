@@ -1,6 +1,6 @@
 from climate.mongo_db_operations.mongo_operations import MongoDB_Operation
 from climate.s3_bucket_operations.s3_operations import s3_operations
-from utils.logger import App_Logger
+from utils.logger import app_logger
 from utils.read_params import read_params
 
 
@@ -33,7 +33,7 @@ class db_operation_train:
 
         self.db_op = MongoDB_Operation()
 
-        self.log_writer = App_Logger()
+        self.log_writer = app_logger()
 
     def insert_good_data_as_record(self, good_data_db_name, good_data_collection_name):
         """

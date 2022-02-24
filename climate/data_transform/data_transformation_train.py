@@ -1,5 +1,5 @@
 from climate.s3_bucket_operations.s3_operations import s3_operations
-from utils.logger import App_Logger
+from utils.logger import app_logger
 from utils.read_params import read_params
 
 
@@ -7,7 +7,7 @@ class data_transform_train:
     """
     Description :  This class shall be used for transforming the training batch data before loading it in Database!!.
 
-    Version     :   1.0
+    Version     :   1.2
     Revisions   :   None
     """
 
@@ -18,7 +18,7 @@ class data_transform_train:
 
         self.s3 = s3_operations()
 
-        self.log_writer = App_Logger()
+        self.log_writer = app_logger()
 
         self.good_train_data_dir = self.config["data"]["train"]["good_data_dir"]
 

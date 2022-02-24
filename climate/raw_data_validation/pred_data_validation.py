@@ -1,7 +1,7 @@
 import re
 
 from climate.s3_bucket_operations.s3_operations import s3_operations
-from utils.logger import App_Logger
+from utils.logger import app_logger
 from utils.read_params import read_params
 
 
@@ -18,7 +18,7 @@ class raw_pred_data_validation:
 
         self.raw_data_bucket_name = raw_data_bucket_name
 
-        self.log_writer = App_Logger()
+        self.log_writer = app_logger()
 
         self.class_name = self.__class__.__name__
 
@@ -31,6 +31,8 @@ class raw_pred_data_validation:
         self.raw_pred_data_dir = self.config["data"]["raw_data"]["pred_batch"]
 
         self.pred_schema_file = self.config["schema_file"]["pred_schema_file"]
+
+        self.regex_file = self.config["regex_file"]
 
         self.pred_schema_log = self.config["pred_db_log"]["values_from_schema"]
 
@@ -134,7 +136,11 @@ class raw_pred_data_validation:
                 table_name=self.pred_gen_log,
             )
 
-            regex = "['wafer']+['\_'']+[\d_]+[\d]+\.csv"
+            regex = self.s3.read_text(
+                file_name=self.regex_file,
+                bucket_name=self.input_files_bucket,
+                table_name=self.pred_gen_log,
+            )
 
             self.log_writer.log(
                 table_name=self.pred_gen_log,
@@ -158,6 +164,51 @@ class raw_pred_data_validation:
                 table_name=self.pred_gen_log,
             )
 
+    def create_dirs_for_good_bad_data(self, table_name):
+        """
+        Method Name :   create_dirs_for_good_bad_data
+        Description :   This method is used for creating directory for good and bad data in s3 bucket
+
+        Version     :   1.2
+        Revisions   :   moved setup to cloud
+        """
+        method_name = self.create_dirs_for_good_bad_data.__name__
+
+        self.log_writer.start_log(
+            key="start",
+            class_name=self.class_name,
+            method_name=method_name,
+            table_name=table_name,
+        )
+
+        try:
+            self.s3.create_folder(
+                bucket_name=self.pred_data_bucket,
+                folder_name=self.good_pred_data_dir,
+                table_name=table_name,
+            )
+
+            self.s3.create_folder(
+                bucket_name=self.pred_data_bucket,
+                folder_name=self.bad_pred_data_dir,
+                table_name=table_name,
+            )
+
+            self.log_writer.start_log(
+                key="exit",
+                class_name=self.class_name,
+                method_name=method_name,
+                table_name=table_name,
+            )
+
+        except Exception as e:
+            self.log_writer.exception_log(
+                error=e,
+                class_name=self.class_name,
+                method_name=method_name,
+                table_name=table_name,
+            )
+
     def validate_raw_file_name(
         self, regex, LengthOfDateStampInFile, LengthOfTimeStampInFile
     ):
@@ -178,7 +229,7 @@ class raw_pred_data_validation:
         )
 
         try:
-            self.s3.create_dirs_for_good_bad_data(table_name=self.pred_name_valid_log)
+            self.create_dirs_for_good_bad_data(table_name=self.pred_name_valid_log)
 
             onlyfiles = self.s3.get_files(
                 bucket=self.raw_data_bucket_name,

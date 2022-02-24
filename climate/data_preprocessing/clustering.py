@@ -2,7 +2,7 @@ from climate.s3_bucket_operations.s3_operations import s3_operations
 from kneed import KneeLocator
 from matplotlib import pyplot as plt
 from sklearn.cluster import KMeans
-from utils.logger import App_Logger
+from utils.logger import app_logger
 from utils.read_params import read_params
 
 
@@ -28,17 +28,15 @@ class kmeans_clustering:
 
         self.max_clusters = self.config["kmeans_cluster"]["max_clusters"]
 
-        self.kmeans_curve = self.config["kmeans_cluster"]["knee_locator"]["curve"]
+        self.kmeans_curve = self.config["kmeans_cluster"]["knee"]["curve"]
 
-        self.kmeans_direction = self.config["kmeans_cluster"]["knee_locator"][
-            "direction"
-        ]
+        self.kmeans_direction = self.config["kmeans_cluster"]["knee"]["direction"]
 
         self.s3 = s3_operations()
 
         self.elbow_plot_file = self.config["elbow_plot_fig"]
 
-        self.log_writer = App_Logger()
+        self.log_writer = app_logger()
 
         self.class_name = self.__class__.__name__
 
@@ -48,8 +46,9 @@ class kmeans_clustering:
         Description :   This method saves the plot to s3 bucket and decides the optimum number of clusters to the file.
         Output      :   A picture saved to the s3_bucket
         On Failure  :   Raise Exception
-        Version     :   1.0
-        Revisions   :   None
+
+        Version     :   1.2
+        Revisions   :   Moved to setup to cloud
         """
         method_name = self.elbow_plot.__name__
 
@@ -129,8 +128,8 @@ class kmeans_clustering:
         Description :   Create a new dataframe consisting of the cluster information.
         Output      :   A datframe with cluster column
         On Failure  :   Raise Exception
-        Version     :   1.0
-        Revisions   :   None
+        Version     :   1.2
+        Revisions   :   Moved to setup to cloud
         """
         method_name = self.create_clusters.__name__
 

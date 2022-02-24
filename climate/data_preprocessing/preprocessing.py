@@ -3,7 +3,7 @@ import pandas as pd
 from climate.s3_bucket_operations.s3_operations import s3_operations
 from sklearn.impute import KNNImputer
 from sklearn.preprocessing import StandardScaler
-from utils.logger import App_Logger
+from utils.logger import app_logger
 from utils.read_params import read_params
 
 
@@ -15,7 +15,7 @@ class preprocessor:
     """
 
     def __init__(self, table_name):
-        self.log_writer = App_Logger()
+        self.log_writer = app_logger()
 
         self.config = read_params()
 
@@ -94,6 +94,7 @@ class preprocessor:
         Output      :   Returns two separate Dataframes, one containing features and the other containing Labels .
         On Failure  :   Raise Exception
         Written By  :   iNeuron Intelligence
+
         Version     :   1.2
         Revisions   :   moved setup to cloud
 
@@ -144,6 +145,7 @@ class preprocessor:
         Method Name :   drop_unnecessary_columns
         Description :   This method drops the unwanted columns as discussed in EDA section.
         Written By  :   iNeuron Intelligence
+
         Version     :   1.2
         Revisions   :   moved setup to cloud
 
@@ -186,6 +188,7 @@ class preprocessor:
         Method Name :   replace_invalid_with_null
         Description :   This method replaces invalid values i.e. '?' with null, as discussed in EDA.
         Written By  :   iNeuron Intelligence
+
         Version     :   1.2
         Revisions   :   moved setup to cloud
         """
@@ -232,9 +235,10 @@ class preprocessor:
         Method Name :   is_null_present
         Description :   This method checks whether there are null values present in the pandas Dataframe or not.
         Output      :   Returns True if null values are present in the DataFrame, False if they are not present and
-        returns the list of columns for which null values are present.
+                        returns the list of columns for which null values are present.
         On Failure  :   Raise Exception
         Written By  :   iNeuron Intelligence
+
         Version     :   1.2
         Revisions   :   moved setup to cloud
         """
@@ -312,6 +316,7 @@ class preprocessor:
         Output      :   A Dataframe which has all the categorical values encoded.
         On Failure  :   Raise Exception
         Written By  :   iNeuron Intelligence
+
         Version     :   1.2
         Revisions   :   moved setup to cloud
         """
@@ -477,6 +482,7 @@ class preprocessor:
         Output      :   List of the columns with standard deviation of zero
         On Failure  :   Raise Exception
         Written By  :   iNeuron Intelligence
+
         Version     :   1.2
         Revisions   :   moved setup to cloud
         """

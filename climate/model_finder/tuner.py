@@ -1,5 +1,5 @@
 from sklearn.ensemble import RandomForestRegressor
-from utils.logger import App_Logger
+from utils.logger import app_logger
 from utils.model_utils import get_model_name, get_model_params, get_model_score
 from utils.read_params import read_params
 from xgboost import XGBRegressor
@@ -24,7 +24,7 @@ class model_finder:
 
         self.verbose = self.config["model_utils"]["verbose"]
 
-        self.log_writer = App_Logger()
+        self.log_writer = app_logger()
 
         self.rf_model = RandomForestRegressor()
 

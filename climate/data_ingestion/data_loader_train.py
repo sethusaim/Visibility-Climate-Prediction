@@ -1,5 +1,5 @@
 from climate.s3_bucket_operations.s3_operations import s3_operations
-from utils.logger import App_Logger
+from utils.logger import app_logger
 from utils.read_params import read_params
 
 
@@ -7,7 +7,7 @@ class data_getter_train:
     """
     Description :   This class shall be used for obtaining the df from the source for training
     Version     :   1.2
-    Revisions   :   Moved to setup to cloud run setup
+    Revisions   :   Moved to setup to cloud
     """
 
     def __init__(self, table_name):
@@ -15,13 +15,13 @@ class data_getter_train:
 
         self.table_name = table_name
 
-        self.training_file = self.config["export_train_csv_file"]
+        self.train_csv_file = self.config["export_csv_file"]["train"]
 
         self.input_files_bucket = self.config["s3_bucket"]["input_files_bucket"]
 
         self.s3 = s3_operations()
 
-        self.log_writer = App_Logger()
+        self.log_writer = app_logger()
 
         self.class_name = self.__class__.__name__
 
@@ -32,8 +32,9 @@ class data_getter_train:
         Output      :   A pandas dataframe
         On failure  :   Raise Exception
         Written by  :   iNeuron Intelligence
-        Version     :   1.1
-        Revisions   :   modified code based on params.yaml file
+
+        Version     :   1.2
+        Revisions   :   moved setup to cloud
         """
         method_name = self.get_data.__name__
 
@@ -47,7 +48,7 @@ class data_getter_train:
         try:
             df = self.s3.read_csv(
                 bucket=self.input_files_bucket,
-                file_name=self.training_file,
+                file_name=self.train_csv_file,
                 table_name=self.table_name,
             )
 
