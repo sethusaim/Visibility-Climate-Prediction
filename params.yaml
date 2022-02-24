@@ -144,6 +144,8 @@ null_values_csv_file : null_values.csv
 
 pred_output_file : predictions.csv
 
+regex_file: climate_regex.txt
+
 export_csv_file:
   train: train_input_file.csv
   pred: pred_input_file.csv
