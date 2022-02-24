@@ -114,8 +114,7 @@ class preprocessor:
             self.Y = data[label_column_name]
 
             self.log_writer.log(
-                table_name=self.table_name,
-                log_message="Label Separation Successful",
+                table_name=self.table_name, log_message="Label Separation Successful",
             )
 
             self.log_writer.start_log(
@@ -129,8 +128,7 @@ class preprocessor:
 
         except Exception as e:
             self.log_writer.log(
-                table_name=self.table_name,
-                log_message="Label Separation Unsuccessful",
+                table_name=self.table_name, log_message="Label Separation Unsuccessful",
             )
 
             self.log_writer.exception_log(
@@ -298,8 +296,7 @@ class preprocessor:
 
         except Exception as e:
             self.log_writer.log(
-                table_name=self.table_name,
-                log_message="Finding missing values failed",
+                table_name=self.table_name, log_message="Finding missing values failed",
             )
 
             self.log_writer.exception_log(

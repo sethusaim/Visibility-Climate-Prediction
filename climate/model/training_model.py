@@ -26,7 +26,7 @@ class train_model:
 
         self.model_train_log = self.config["train_db_log"]["model_training"]
 
-        self.model_bucket = self.config["s3_bucket"]["wafer_model_bucket"]
+        self.model_bucket = self.config["s3_bucket"]["climate_model_bucket"]
 
         self.test_size = self.config["base"]["test_size"]
 
@@ -77,7 +77,7 @@ class train_model:
         try:
             data = self.data_getter_train_obj.get_data()
 
-            data = self.preprocessor_obj.remove_columns(data, ["Wafer"])
+            data = self.preprocessor_obj.remove_columns(data, ["climate"])
 
             X, Y = self.preprocessor_obj.separate_label_feature(
                 data, label_column_name=self.target_col

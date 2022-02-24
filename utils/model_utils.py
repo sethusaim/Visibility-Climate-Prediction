@@ -30,8 +30,7 @@ def get_model_name(model, table_name):
         model_name = model.__class__.__name__
 
         log_writer.log(
-            table_name=table_name,
-            log_message=f"Got the {model} model_name",
+            table_name=table_name, log_message=f"Got the {model} model_name",
         )
 
         log_writer.start_log(

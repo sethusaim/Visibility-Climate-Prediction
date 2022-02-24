@@ -385,9 +385,7 @@ class s3_operations:
                 )
 
                 self.put_object(
-                    bucket=bucket_name,
-                    folder_name=folder_name,
-                    table_name=table_name,
+                    bucket=bucket_name, folder_name=folder_name, table_name=table_name,
                 )
 
                 self.log_writer.log(
@@ -539,8 +537,7 @@ class s3_operations:
             bucket = s3_resource.Bucket(bucket)
 
             self.log_writer.log(
-                table_name=table_name,
-                log_message=f"Got {bucket} bucket",
+                table_name=table_name, log_message=f"Got {bucket} bucket",
             )
 
             self.log_writer.start_log(
@@ -673,9 +670,7 @@ class s3_operations:
             )
 
             self.delete_file(
-                bucket=src_bucket,
-                file=src_file,
-                table_name=table_name,
+                bucket=src_bucket, file=src_file, table_name=table_name,
             )
 
             self.log_writer.log(
@@ -717,9 +712,7 @@ class s3_operations:
 
         try:
             lst = self.get_file_object(
-                bucket=bucket,
-                table_name=table_name,
-                filename=folder_name,
+                bucket=bucket, table_name=table_name, filename=folder_name,
             )
 
             list_of_files = [obj.key for obj in lst]
@@ -764,10 +757,7 @@ class s3_operations:
         )
 
         try:
-            s3_bucket = self.get_bucket(
-                bucket=bucket,
-                table_name=table_name,
-            )
+            s3_bucket = self.get_bucket(bucket=bucket, table_name=table_name,)
 
             lst_objs = [obj for obj in s3_bucket.objects.filter(Prefix=filename)]
 
@@ -816,9 +806,7 @@ class s3_operations:
 
         try:
             f_obj = self.get_file_object(
-                bucket=bucket,
-                filename=model_name,
-                table_name=table_name,
+                bucket=bucket, filename=model_name, table_name=table_name,
             )
 
             model_obj = self.read_object(f_obj, decode=False, table_name=table_name)

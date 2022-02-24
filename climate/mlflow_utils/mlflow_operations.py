@@ -548,10 +548,7 @@ class mlflow_operations:
 
                 for param in model_params_list:
                     self.log_param(
-                        idx=idx,
-                        model=model,
-                        model_name=model_name,
-                        param=param,
+                        idx=idx, model=model, model_name=model_name, param=param,
                     )
 
                 self.log_model(model=model, model_name=model_name)

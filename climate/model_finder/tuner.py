@@ -243,7 +243,5 @@ class model_finder:
 
         except Exception as e:
             self.log_writer.exception_log(
-                error=e,
-                class_name=self.class_name,
-                method_name=method_name,
+                error=e, class_name=self.class_name, method_name=method_name,
             )

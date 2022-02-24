@@ -170,8 +170,7 @@ class mongo_db_operation:
             )
 
             self.log_writer.log(
-                table_name=table_name,
-                log_message=f"Got the collection from mongodb",
+                table_name=table_name, log_message=f"Got the collection from mongodb",
             )
 
             self.log_writer.start_log(
@@ -221,8 +220,7 @@ class mongo_db_operation:
                 df = df.drop(columns=["_id"], axis=1)
 
             self.log_writer.log(
-                table_name=table_name,
-                log_message="Converted collection to dataframe",
+                table_name=table_name, log_message="Converted collection to dataframe",
             )
 
             self.log_writer.start_log(
