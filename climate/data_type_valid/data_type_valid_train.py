@@ -1,4 +1,4 @@
-from climate.mongo_db_operations.mongo_operations import MongoDB_Operation
+from climate.mongo_db_operations.mongo_operations import mongo_db_operation
 from climate.s3_bucket_operations.s3_operations import s3_operations
 from utils.logger import app_logger
 from utils.read_params import read_params
@@ -31,7 +31,7 @@ class db_operation_train:
 
         self.s3 = s3_operations()
 
-        self.db_op = MongoDB_Operation()
+        self.db_op = mongo_db_operation()
 
         self.log_writer = app_logger()
 

@@ -1,8 +1,8 @@
 import re
 
-from climate.s3_bucket_operations.s3_operations import s3_operations
 from utils.logger import app_logger
 from utils.read_params import read_params
+from climate.s3_bucket_operations.s3_operations import s3_operations
 
 
 class raw_train_data_validation:
@@ -24,7 +24,7 @@ class raw_train_data_validation:
 
         self.s3 = s3_operations()
 
-        self.train_data_bucket = self.config["s3_bucket"]["climate_train_data_bucket"]
+        self.train_data_bucket = self.config["s3_bucket"]["scania_train_data_bucket"]
 
         self.input_files_bucket = self.config["s3_bucket"]["input_files_bucket"]
 

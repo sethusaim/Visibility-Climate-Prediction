@@ -1,4 +1,4 @@
-from climate.mongo_db_operations.mongo_operations import MongoDB_Operation
+from climate.mongo_db_operations.mongo_operations import mongo_db_operation
 from climate.s3_bucket_operations.s3_operations import s3_operations
 from utils.logger import app_logger
 from utils.read_params import read_params
@@ -17,9 +17,9 @@ class db_operation_pred:
 
         self.class_name = self.__class__.__name__
 
-        self.pred_data_bucket = self.config["s3_bucket"]["climate_pred_data_bucket"]
+        self.pred_data_bucket = self.config["s3_bucket"]["scania_pred_data_bucket"]
 
-        self.pred_export_csv_file = self.config["export_pred_csv_file"]
+        self.pred_export_csv_file = self.config["export_csv_file"]["pred"]
 
         self.good_data_pred_dir = self.config["data"]["pred"]["good_data_dir"]
 
@@ -31,7 +31,7 @@ class db_operation_pred:
 
         self.s3 = s3_operations()
 
-        self.db_op = MongoDB_Operation()
+        self.db_op = mongo_db_operation()
 
         self.log_writer = app_logger()
 

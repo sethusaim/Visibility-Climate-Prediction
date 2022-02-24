@@ -20,7 +20,7 @@ class prediction:
 
         self.pred_log = self.config["pred_db_log"]["pred_main"]
 
-        self.model_bucket = self.config["s3_bucket"]["climate_model_bucket"]
+        self.model_bucket = self.config["s3_bucket"]["wafer_model_bucket"]
 
         self.input_files_bucket = self.config["s3_bucket"]["inputs_files_bucket"]
 
@@ -181,7 +181,7 @@ class prediction:
                 bucket=self.model_bucket, model_name="KMeans", table_name=self.pred_log
             )
 
-            clusters = kmeans.predict(data.drop(["climate"], axis=1))
+            clusters = kmeans.predict(data.drop(["Wafer"], axis=1))
 
             data["clusters"] = clusters
 
@@ -190,9 +190,9 @@ class prediction:
             for i in clusters:
                 cluster_data = data[data["clusters"] == i]
 
-                climate_names = list(cluster_data["climate"])
+                wafer_names = list(cluster_data["Wafer"])
 
-                cluster_data = data.drop(labels=["climate"], axis=1)
+                cluster_data = data.drop(labels=["Wafer"], axis=1)
 
                 cluster_data = cluster_data.drop(["clusters"], axis=1)
 
@@ -207,7 +207,7 @@ class prediction:
                 result = list(model.predict(cluster_data))
 
                 result = pd.DataFrame(
-                    list(zip(climate_names, result)), columns=["climate", "Prediction"]
+                    list(zip(wafer_names, result)), columns=["Wafer", "Prediction"]
                 )
 
                 self.s3.upload_df_as_csv(
