@@ -1,20 +1,21 @@
 from climate.data_transform.data_transformation_pred import Data_Transform_Pred
 from climate.data_type_valid.data_type_valid_pred import DB_Operation_Pred
-from climate.raw_data_validation.pred_data_validation import raw_pred_data_validation
-from utils.logger import app_logger
+from climate.raw_data_validation.pred_data_validation import Raw_Pred_Data_Validation
+from utils.logger import App_Logger
 from utils.read_params import read_params
 
 
-class pred_validation:
+class Pred_Validation:
     """
-    Description :   This class is used for validating all the prediction batch files
-
+    Description :   This class is used for validating all the Prediction batch files
+    Written by  :   iNeuron Intelligence
+    
     Version     :   1.2
-    Revisions   :   moved to setup to cloud
+    Revisions   :   Moved to setup to cloud 
     """
 
     def __init__(self, bucket_name):
-        self.raw_data = raw_pred_data_validation(raw_data_bucket_name=bucket_name)
+        self.raw_data = Raw_Pred_Data_Validation(raw_data_bucket_name=bucket_name)
 
         self.data_transform = Data_Transform_Pred()
 
@@ -24,8 +25,6 @@ class pred_validation:
 
         self.class_name = self.__class__.__name__
 
-        self.db_name = self.config["db_log"]["db_pred_log"]
-
         self.pred_main_log = self.config["pred_db_log"]["pred_main"]
 
         self.good_data_db_name = self.config["mongodb"]["climate_data_db_name"]
@@ -34,12 +33,15 @@ class pred_validation:
             "climate_pred_data_collection"
         ]
 
-        self.log_writer = app_logger()
+        self.log_writer = App_Logger()
 
     def prediction_validation(self):
         """
-        Method Name :   load_s3
-        Description :   This method is used for validating the prediction btach files
+        Method Name :   prediction_validation
+        Description :   This method is responsible for converting raw data to cleaned data for prediction
+
+        Output      :   Raw data is converted to cleaned data for prediction
+        On Failure  :   Write an exception log and then raise an exception
 
         Version     :   1.2
         Revisions   :   moved setup to cloud
@@ -81,9 +83,7 @@ class pred_validation:
                 log_message="Starting Data Transformation",
             )
 
-            self.data_transform.rename_target_column()
-
-            self.data_transform.replace_missing_with_null()
+            self.data_transform.add_quotes_to_string()
 
             self.log_writer.log(
                 table_name=self.pred_main_log,

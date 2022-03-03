@@ -1,12 +1,12 @@
 import mlflow
-from climate.data_ingestion.data_loader_train import data_getter_train
-from climate.data_preprocessing.clustering import kmeans_clustering
-from climate.data_preprocessing.preprocessing import preprocessor
-from climate.mlflow_utils.mlflow_operations import mlflow_operations
-from climate.model_finder.tuner import model_finder
-from climate.s3_bucket_operations.s3_operations import s3_operations
+from climate.data_ingestion.data_loader_train import Data_Getter_Train
+from climate.data_preprocessing.clustering import KMeans_Clustering
+from climate.data_preprocessing.preprocessing import Preprocessor
+from climate.mlflow_utils.mlflow_operations import MLFlow_Operation
+from climate.model_finder.tuner import Model_Finder
+from climate.s3_bucket_operations.s3_operations import S3_Operation
 from sklearn.model_selection import train_test_split
-from utils.logger import app_logger
+from utils.logger import App_Logger
 from utils.read_params import read_params
 
 
@@ -20,7 +20,7 @@ class train_model:
     """
 
     def __init__(self):
-        self.log_writer = app_logger()
+        self.log_writer = App_Logger()
 
         self.config = read_params()
 
@@ -44,19 +44,17 @@ class train_model:
 
         self.class_name = self.__class__.__name__
 
-        self.mlflow_op = mlflow_operations(table_name=self.model_train_log)
+        self.mlflow_op = MLFlow_Operation(table_name=self.model_train_log)
 
-        self.data_getter_train_object = data_getter_train(
-            table_name=self.model_train_log
-        )
+        self.data_getter_train = Data_Getter_Train(table_name=self.model_train_log)
 
-        self.preprocessor_object = preprocessor(table_name=self.model_train_log)
+        self.preprocessor = Preprocessor(table_name=self.model_train_log)
 
-        self.kmeans_object = kmeans_clustering(table_name=self.model_train_log)
+        self.kmeans_op = KMeans_Clustering(table_name=self.model_train_log)
 
-        self.model_finder_object = model_finder(table_name=self.model_train_log)
+        self.model_finder = Model_Finder(table_name=self.model_train_log)
 
-        self.s3 = s3_operations()
+        self.s3 = S3_Operation()
 
     def training_model(self):
         """
@@ -77,28 +75,26 @@ class train_model:
         )
 
         try:
-            data = self.data_getter_train_object.get_data()
+            data = self.data_getter_train.get_data()
 
-            data = self.preprocessor_object.remove_columns(data, ["climate"])
+            data = self.preprocessor.remove_columns(data, ["climate"])
 
-            X, Y = self.preprocessor_object.separate_label_feature(
+            X, Y = self.preprocessor.separate_label_feature(
                 data, label_column_name=self.target_col
             )
 
-            is_null_present = self.preprocessor_object.is_null_present(X)
+            is_null_present = self.preprocessor.is_null_present(X)
 
             if is_null_present:
-                X = self.preprocessor_object.impute_missing_values(X)
+                X = self.preprocessor.impute_missing_values(X)
 
-            cols_to_drop = self.preprocessor_object.get_columns_with_zero_std_deviation(
-                X
-            )
+            cols_to_drop = self.preprocessor.get_columns_with_zero_std_deviation(X)
 
-            X = self.preprocessor_object.remove_columns(X, cols_to_drop)
+            X = self.preprocessor.remove_columns(X, cols_to_drop)
 
-            number_of_clusters = self.kmeans_object.elbow_plot(X)
+            number_of_clusters = self.kmeans_op.elbow_plot(X)
 
-            X, kmeans_model = self.kmeans_object.create_clusters(
+            X, kmeans_model = self.kmeans_op.create_clusters(
                 data=X, number_of_clusters=number_of_clusters
             )
 
@@ -135,7 +131,7 @@ class train_model:
                     xgb_model_score,
                     rf_model,
                     rf_model_score,
-                ) = self.model_finder_object.get_trained_models(
+                ) = self.model_finder.get_trained_models(
                     x_train, y_train, x_test, y_test
                 )
 

@@ -5,7 +5,7 @@ from utils.read_params import read_params
 from xgboost import XGBRegressor
 
 
-class model_finder:
+class Model_Finder:
     """
     Description :   This class shall  be used to find the model with best accuracy and AUC score.
     Written By  :   iNeuron Intelligence
