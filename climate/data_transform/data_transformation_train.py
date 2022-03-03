@@ -47,7 +47,7 @@ class Data_Transform_Train:
             lst = self.s3.read_csv_from_folder(
                 folder_name=self.good_train_data_dir,
                 bucket_name=self.train_data_bucket,
-                table_name=self.train_data_transform_log
+                table_name=self.train_data_transform_log,
             )
 
             for idx, f in enumerate(lst):
@@ -70,7 +70,7 @@ class Data_Transform_Train:
                         local_file_name=abs_f,
                         bucket_file_name=file,
                         bucket_name=self.train_data_bucket,
-                        table_name=self.train_data_transform_log
+                        table_name=self.train_data_transform_log,
                     )
 
                 else:

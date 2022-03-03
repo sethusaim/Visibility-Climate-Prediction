@@ -47,7 +47,7 @@ class Data_Transform_Pred:
             lst = self.s3.read_csv_from_folder(
                 folder_name=self.good_pred_data_dir,
                 bucket_name=self.pred_data_bucket,
-                table_name=self.pred_data_transform_log
+                table_name=self.pred_data_transform_log,
             )
 
             for idx, f in enumerate(lst):
@@ -70,7 +70,7 @@ class Data_Transform_Pred:
                         local_file_name=abs_f,
                         bucket_file_name=file,
                         bucket_name=self.pred_data_bucket,
-                        table_name=self.pred_data_transform_log
+                        table_name=self.pred_data_transform_log,
                     )
 
                 else:
