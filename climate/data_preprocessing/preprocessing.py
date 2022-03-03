@@ -1,13 +1,13 @@
 import numpy as np
 import pandas as pd
-from climate.s3_bucket_operations.s3_operations import s3_operations
+from climate.s3_bucket_operations.s3_operations import S3_Operation
 from sklearn.impute import KNNImputer
 from sklearn.preprocessing import StandardScaler
-from utils.logger import app_logger
+from utils.logger import App_Logger
 from utils.read_params import read_params
 
 
-class preprocessor:
+class Preprocessor:
     """
     Written By  :   iNeuron Intelligence
     Version     :   1.2
@@ -15,7 +15,7 @@ class preprocessor:
     """
 
     def __init__(self, table_name):
-        self.log_writer = app_logger()
+        self.log_writer = App_Logger()
 
         self.config = read_params()
 
@@ -31,16 +31,17 @@ class preprocessor:
 
         self.knn_weights = (self.config["weights"],)
 
-        self.input_files_bucket = self.config["s3_bucket"]["input_files_bucket"]
+        self.input_files_bucket = self.config["s3_bucket"]["input_files"]
 
-        self.s3 = s3_operations()
+        self.s3 = S3_Operation()
 
     def remove_columns(self, data, columns):
         """
         Method Name :   remove_columns
         Description :   This method removes the given columns from a pandas dataframe.
-        Output      :   A pandas DataFrame after removing the specified columns.
-        On Failure  :   Raise Exception
+        
+        Output      :   A pandas dataframe after removing the specified columns.
+        On Failure  :   Write an exception log and then raise an exception
 
         Written By  :   iNeuron Intelligence
         Version     :   1.2
@@ -91,13 +92,13 @@ class preprocessor:
         """
         Method Name :   separate_label_feature
         Description :   This method separates the features and a Label Coulmns.
+        
         Output      :   Returns two separate Dataframes, one containing features and the other containing Labels .
-        On Failure  :   Raise Exception
+        On Failure  :   Write an exception log and then raise an exception
+        
         Written By  :   iNeuron Intelligence
-
         Version     :   1.2
         Revisions   :   moved setup to cloud
-
         """
         method_name = self.separate_label_feature.__name__
 
@@ -138,15 +139,17 @@ class preprocessor:
                 table_name=self.table_name,
             )
 
-    def drop_unnecessary_columns(self, data, columnNameList):
+    def drop_unnecessary_columns(self, data, cols):
         """
         Method Name :   drop_unnecessary_columns
-        Description :   This method drops the unwanted columns as discussed in EDA section.
+        Description :   This method drop unnecessary columns in the dataframe
+        
+        Output      :   Unnecessary columns are dropped in the dataframe
+        On Failure  :   Write an exception log and then raise an exception
+        
         Written By  :   iNeuron Intelligence
-
         Version     :   1.2
         Revisions   :   moved setup to cloud
-
         """
         method_name = self.drop_unnecessary_columns.__name__
 
@@ -158,7 +161,7 @@ class preprocessor:
         )
 
         try:
-            data = data.drop(columnNameList, axis=1)
+            data = data.drop(cols, axis=1)
 
             self.log_writer.log(
                 table_name=self.table_name, log_message="Dropped unnecessary columns"
@@ -184,9 +187,12 @@ class preprocessor:
     def replace_invalid_with_null(self, data):
         """
         Method Name :   replace_invalid_with_null
-        Description :   This method replaces invalid values i.e. '?' with null, as discussed in EDA.
+        Description :   This method replaces invalid values with null 
+        
+        Output      :   A dataframe where invalid values are replaced with null
+        On Failure  :   Write an exception log and then raise an exception
+        
         Written By  :   iNeuron Intelligence
-
         Version     :   1.2
         Revisions   :   moved setup to cloud
         """
@@ -231,12 +237,13 @@ class preprocessor:
     def is_null_present(self, data):
         """
         Method Name :   is_null_present
-        Description :   This method checks whether there are null values present in the pandas Dataframe or not.
-        Output      :   Returns True if null values are present in the DataFrame, False if they are not present and
+        Description :   This method checks whether there are null values present in the pandas dataframe or not.
+        
+        Output      :   Returns True if null values are present in the dataframe, False if they are not present and
                         returns the list of columns for which null values are present.
-        On Failure  :   Raise Exception
+        On Failure  :   Write an exception log and then raise an exception
+        
         Written By  :   iNeuron Intelligence
-
         Version     :   1.2
         Revisions   :   moved setup to cloud
         """
@@ -265,7 +272,7 @@ class preprocessor:
                     self.cols_with_missing_values.append(self.cols[i])
 
             if self.null_present:
-                self.dataframe_with_null = pd.DataFrame()
+                self.dataframe_with_null = pd.dataframe()
 
                 self.dataframe_with_null["columns"] = data.columns
 
@@ -310,10 +317,11 @@ class preprocessor:
         """
         Method Name :   encode_target_cols
         Description :   This method encodes all the categorical values in the training set.
-        Output      :   A Dataframe which has all the categorical values encoded.
-        On Failure  :   Raise Exception
+        
+        Output      :   A dataframe which has all the categorical values encoded.
+        On Failure  :   Write an exception log and then raise an exception
+        
         Written By  :   iNeuron Intelligence
-
         Version     :   1.2
         Revisions   :   moved setup to cloud
         """
@@ -356,8 +364,9 @@ class preprocessor:
     def apply_standard_scaler(self, X):
         """
         Method Name : apply_standard_scaler
-        Description : This method replaces all the missing values in the Dataframe using KNN Imputer.
-        Output      : A Dataframe which has all the missing values imputed.
+        Description : This method replaces all the missing values in the dataframe using KNN Imputer.
+        
+        Output      : A dataframe which has all the missing values imputed.
         On Failure  : Raise Exception
 
         Written By  : iNeuron Intelligence
@@ -403,8 +412,9 @@ class preprocessor:
     def impute_missing_values(self, data):
         """
         Method Name : impute_missing_values
-        Description : This method replaces all the missing values in the Dataframe using KNN Imputer.
-        Output      : A Dataframe which has all the missing values imputed.
+        Description : This method replaces all the missing values in the dataframe using KNN Imputer.
+        
+        Output      : A dataframe which has all the missing values imputed.
         On Failure  : Raise Exception
 
         Written By  : iNeuron Intelligence
@@ -441,7 +451,7 @@ class preprocessor:
                 log_message="Imputed missing values using KNN imputer",
             )
 
-            self.new_data = pd.DataFrame(
+            self.new_data = pd.dataframe(
                 data=(self.new_array), columns=self.data.columns
             )
 
@@ -476,10 +486,11 @@ class preprocessor:
         """
         Method Name :   get_columns_with_zero_std_deviation
         Description :   This method finds out the columns which have a standard deviation of zero.
+        
         Output      :   List of the columns with standard deviation of zero
-        On Failure  :   Raise Exception
+        On Failure  :   Write an exception log and then raise an exception
+        
         Written By  :   iNeuron Intelligence
-
         Version     :   1.2
         Revisions   :   moved setup to cloud
         """

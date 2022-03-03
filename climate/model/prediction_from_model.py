@@ -206,7 +206,7 @@ class prediction:
 
                 result = list(model.predict(cluster_data))
 
-                result = pd.DataFrame(
+                result = pd.dataframe(
                     list(zip(climate_names, result)), columns=["climate", "Prediction"]
                 )
 
