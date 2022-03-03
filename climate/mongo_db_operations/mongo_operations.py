@@ -143,7 +143,7 @@ class MongoDB_Operation:
 
             collection = database.get_collection(name=collection_name)
 
-            df = pd.dataframe(list(collection.find()))
+            df = pd.DataFrame(list(collection.find()))
 
             if "_id" in df.columns.to_list():
                 df = df.drop(columns=["_id"], axis=1)
