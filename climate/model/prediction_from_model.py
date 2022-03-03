@@ -1,9 +1,10 @@
 import pandas as pd
 from botocore.exceptions import ClientError
-from climate.data_ingestion.data_loader_prediction import data_getter_pred
-from climate.data_preprocessing.preprocessing import preprocessor
-from climate.s3_bucket_operations.s3_operations import s3_operations
-from utils.logger import app_logger
+from sklearn.neighbors import LocalOutlierFactor
+from climate.data_ingestion.data_loader_prediction import Data_Getter_Pred
+from climate.data_preprocessing.preprocessing import Preprocessor
+from climate.s3_bucket_operations.s3_operations import S3_Operation
+from utils.logger import App_Logger
 from utils.read_params import read_params
 
 
@@ -28,13 +29,13 @@ class prediction:
 
         self.pred_output_file = self.config["pred_output_file"]
 
-        self.log_writer = app_logger()
+        self.log_writer = App_Logger()
 
-        self.s3 = s3_operations()
+        self.s3 = S3_Operation()
 
-        self.data_getter_pred = data_getter_pred(table_name=self.pred_log)
+        self.data_getter_pred = Data_Getter_Pred(table_name=self.pred_log)
 
-        self.preprocessor = preprocessor(table_name=self.pred_log)
+        self.preprocessor = Preprocessor(table_name=self.pred_log)
 
         self.class_name = self.__class__.__name__
 
@@ -56,8 +57,8 @@ class prediction:
         )
 
         try:
-            self.s3.load_object(
-                bucket_name=self.input_files_bucket, obj=self.pred_output_file
+            self.s3.load_objectect(
+                bucket_name=self.input_files_bucket, object=self.pred_output_file
             )
 
             self.log_writer.log(
@@ -206,20 +207,27 @@ class prediction:
 
                 result = list(model.predict(cluster_data))
 
-                result = pd.dataframe(
+                result = pd.DataFrame(
                     list(zip(climate_names, result)), columns=["climate", "Prediction"]
                 )
 
                 self.s3.upload_df_as_csv(
                     data_frame=result,
-                    file_name=self.pred_output_file,
-                    bucket=self.input_files_bucket,
-                    dest_file_name=self.pred_output_file,
+                    local_file_name=self.pred_output_file,
+                    bucket_file_name=self.pred_output_file,
+                    bucket_name=self.input_files_bucket,
                     table_name=self.pred_log,
                 )
 
             self.log_writer.log(
                 table_name=self.pred_log, log_message=f"End of Prediction"
+            )
+
+            self.log_writer.start_log(
+                key="exit",
+                class_name=self.class_name,
+                method_name=method_name,
+                table_name=self.pred_log,
             )
 
             return (

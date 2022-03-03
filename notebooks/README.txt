@@ -1,7 +1,7 @@
 The following files are part of the NOAA Weather Data - JFK Airport hosted on IBM Developer Data Asset eXchange.
 
 Homepage: https://developer.ibm.com/exchanges/data/all/jfk-weather-data/
-Download link: http://s3.us-south.cloud-object-storage.appdomain.cloud/dax-assets-dev/dax-noaa-weather-data-jfk-aiport/1.1.2/noaa-weather-data-jfk-airport.tar.gz
+Download link: http://s3.us-south.cloud-objectect-storage.appdomain.cloud/dax-assets-dev/dax-noaa-weather-data-jfk-aiport/1.1.2/noaa-weather-data-jfk-airport.tar.gz
 
 File list: 
 -- jfk_weather.csv : the core dataset as obtained from NOAA.

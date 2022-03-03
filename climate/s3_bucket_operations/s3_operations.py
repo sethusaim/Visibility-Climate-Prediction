@@ -115,18 +115,18 @@ class S3_Operation:
                 table_name=table_name,
             )
 
-    def read_object(self, object, table_name, decode=True, make_readable=False):
+    def read_objectect(self, objectect, table_name, decode=True, make_readable=False):
         """
-        Method Name :   read_object
-        Description :   This method reads the object with kwargs
+        Method Name :   read_objectect
+        Description :   This method reads the objectect with kwargs
 
-        Output      :   A object is read with kwargs
+        Output      :   A objectect is read with kwargs
         On Failure  :   Write an exception log and then raise an exception
 
         Version     :   1.2
         Revisions   :   moved setup to cloud
         """
-        method_name = self.read_object.__name__
+        method_name = self.read_objectect.__name__
 
         self.log_writer.start_log(
             key="start",
@@ -137,21 +137,21 @@ class S3_Operation:
 
         try:
             func = (
-                lambda: object.get()["Body"].read().decode()
+                lambda: objectect.get()["Body"].read().decode()
                 if decode is True
-                else object.get()["Body"].read()
+                else objectect.get()["Body"].read()
             )
 
             self.log_writer.log(
                 table_name=table_name,
-                log_message=f"Read the s3 object with decode as {decode}",
+                log_message=f"Read the s3 objectect with decode as {decode}",
             )
 
             conv_func = lambda: StringIO(func()) if make_readable is True else func()
 
             self.log_writer.log(
                 table_name=table_name,
-                log_message=f"read the s3 object with make_readable as {make_readable}",
+                log_message=f"read the s3 objectect with make_readable as {make_readable}",
             )
 
             self.log_writer.start_log(
@@ -192,11 +192,11 @@ class S3_Operation:
         )
 
         try:
-            txt_obj = self.get_file_object(
+            txt_object = self.get_file_objectect(
                 file_name=file_name, bucket_name=bucket_name, table_name=table_name
             )
 
-            content = self.read_object(object=txt_obj, table_name=table_name)
+            content = self.read_objectect(objectect=txt_object, table_name=table_name)
 
             self.log_writer.log(
                 table_name=table_name,
@@ -241,11 +241,13 @@ class S3_Operation:
         )
 
         try:
-            f_obj = self.get_file_object(
+            f_object = self.get_file_objectect(
                 file_name=file_name, bucket_name=bucket_name, table_name=table_name
             )
 
-            json_content = self.read_object(object=f_obj, table_name=table_name)
+            json_content = self.read_objectect(
+                objectect=f_object, table_name=table_name
+            )
 
             dic = json.loads(json_content)
 
@@ -271,18 +273,18 @@ class S3_Operation:
                 table_name=table_name,
             )
 
-    def get_df_from_object(self, object, table_name):
+    def get_df_from_objectect(self, objectect, table_name):
         """
-        Method Name :   get_df_from_object
-        Description :   This method gets dataframe from object 
+        Method Name :   get_df_from_objectect
+        Description :   This method gets dataframe from objectect 
 
-        Output      :   dataframe is read from the object
+        Output      :   dataframe is read from the objectect
         On Failure  :   Write an exception log and then raise an exception
 
         Version     :   1.2
         Revisions   :   moved setup to cloud
         """
-        method_name = self.get_df_from_object.__name__
+        method_name = self.get_df_from_objectect.__name__
 
         self.log_writer.start_log(
             key="start",
@@ -292,8 +294,8 @@ class S3_Operation:
         )
 
         try:
-            content = self.read_object(
-                object=object, table_name=table_name, make_readable=True
+            content = self.read_objectect(
+                objectect=objectect, table_name=table_name, make_readable=True
             )
 
             df = pd.read_csv(content)
@@ -320,7 +322,7 @@ class S3_Operation:
         Method Name :   read_csv
         Description :   This method reads the csv data from s3 bucket
 
-        Output      :   A pandas series object consisting of runs for the particular experiment id
+        Output      :   A pandas series objectect consisting of runs for the particular experiment id
         On Failure  :   Write an exception log and then raise an exception
 
         Version     :   1.2
@@ -336,11 +338,11 @@ class S3_Operation:
         )
 
         try:
-            csv_obj = self.get_file_object(
+            csv_object = self.get_file_objectect(
                 file_name=file_name, bucket_name=bucket_name, table_name=table_name,
             )
 
-            df = self.get_df_from_object(object=csv_obj, table_name=table_name)
+            df = self.get_df_from_objectect(objectect=csv_object, table_name=table_name)
 
             self.log_writer.log(
                 table_name=table_name,
@@ -421,18 +423,18 @@ class S3_Operation:
                 table_name=table_name,
             )
 
-    def load_object(self, object, bucket_name, table_name):
+    def load_objectect(self, objectect, bucket_name, table_name):
         """
-        Method Name :   load_object
-        Description :   This method loads the object from s3 bucket
+        Method Name :   load_objectect
+        Description :   This method loads the objectect from s3 bucket
 
-        Output      :   An object is loaded from s3 bucket
+        Output      :   An objectect is loaded from s3 bucket
         On Failure  :   Write an exception log and then raise an exception
 
         Version     :   1.2
         Revisions   :   moved setup to cloud
         """
-        method_name = self.load_object.__name__
+        method_name = self.load_objectect.__name__
 
         self.log_writer.start_log(
             key="start",
@@ -444,11 +446,11 @@ class S3_Operation:
         try:
             s3_resource = self.get_s3_resource(table_name=table_name)
 
-            s3_resource.Object(bucket_name, object).load()
+            s3_resource.objectect(bucket_name, objectect).load()
 
             self.log_writer.log(
                 table_name=table_name,
-                log_message=f"Loaded {object} from {bucket_name} bucket_name",
+                log_message=f"Loaded {objectect} from {bucket_name} bucket_name",
             )
 
             self.log_writer.start_log(
@@ -487,7 +489,7 @@ class S3_Operation:
         )
 
         try:
-            self.load_object(bucket_name=bucket_name, object=folder_name)
+            self.load_objectect(bucket_name=bucket_name, objectect=folder_name)
 
             self.log_writer.log(
                 table_name=table_name,
@@ -508,8 +510,10 @@ class S3_Operation:
                     log_message=f"{folder_name} folder does not exist,creating new one",
                 )
 
-                self.put_object(
-                    object=folder_name, bucket_name=bucket_name, table_name=table_name
+                self.put_objectect(
+                    objectect=folder_name,
+                    bucket_name=bucket_name,
+                    table_name=table_name,
                 )
 
                 self.log_writer.log(
@@ -530,18 +534,18 @@ class S3_Operation:
                     table_name=table_name,
                 )
 
-    def put_object(self, object, bucket_name, table_name):
+    def put_objectect(self, objectect, bucket_name, table_name):
         """
-        Method Name :   put_object
-        Description :   This method puts an object in s3 bucket
+        Method Name :   put_objectect
+        Description :   This method puts an objectect in s3 bucket
 
-        Output      :   An object is put in s3 bucket
+        Output      :   An objectect is put in s3 bucket
         On Failure  :   Write an exception log and then raise an exception
 
         Version     :   1.2
         Revisions   :   moved setup to cloud
         """
-        method_name = self.put_object.__name__
+        method_name = self.put_objectect.__name__
 
         self.log_writer.start_log(
             key="start",
@@ -553,11 +557,11 @@ class S3_Operation:
         try:
             s3_client = self.get_s3_client(table_name=table_name)
 
-            s3_client.put_object(Bucket=bucket_name, Key=(object + "/"))
+            s3_client.put_objectect(Bucket=bucket_name, Key=(objectect + "/"))
 
             self.log_writer.log(
                 table_name=table_name,
-                log_message=f"Created {object} folder in {bucket_name} bucket",
+                log_message=f"Created {objectect} folder in {bucket_name} bucket",
             )
 
             self.log_writer.start_log(
@@ -766,7 +770,7 @@ class S3_Operation:
         try:
             s3_resource = self.get_s3_resource(table_name=table_name)
 
-            s3_resource.Object(bucket_name, file_name).delete()
+            s3_resource.objectect(bucket_name, file_name).delete()
 
             self.log_writer.log(
                 table_name=table_name,
@@ -866,11 +870,11 @@ class S3_Operation:
         )
 
         try:
-            lst = self.get_file_object(
+            lst = self.get_file_objectect(
                 bucket_name=bucket_name, table_name=table_name, file_name=folder_name,
             )
 
-            list_of_files = [object.key for object in lst]
+            list_of_files = [objectect.key for objectect in lst]
 
             self.log_writer.log(
                 table_name=table_name,
@@ -894,18 +898,18 @@ class S3_Operation:
                 table_name=table_name,
             )
 
-    def get_file_object(self, file_name, bucket_name, table_name):
+    def get_file_objectect(self, file_name, bucket_name, table_name):
         """
-        Method Name :   get_file_object
-        Description :   This method gets the file object from s3 bucket
+        Method Name :   get_file_objectect
+        Description :   This method gets the file objectect from s3 bucket
 
-        Output      :   A file object is returned
+        Output      :   A file objectect is returned
         On Failure  :   Write an exception log and then raise an exception
 
         Version     :   1.2
         Revisions   :   moved setup to cloud
         """
-        method_name = self.get_file_object.__name__
+        method_name = self.get_file_objectect.__name__
 
         self.log_writer.start_log(
             key="start",
@@ -917,7 +921,9 @@ class S3_Operation:
         try:
             bucket = self.get_bucket(bucket_name=bucket_name, table_name=table_name,)
 
-            lst_objs = [object for object in bucket.objects.filter(Prefix=file_name)]
+            lst_objects = [
+                objectect for objectect in bucket.objectects.filter(Prefix=file_name)
+            ]
 
             self.log_writer.log(
                 table_name=table_name,
@@ -926,7 +932,7 @@ class S3_Operation:
 
             func = lambda x: x[0] if len(x) == 1 else x
 
-            file_objs = func(lst_objs)
+            file_objects = func(lst_objects)
 
             self.log_writer.start_log(
                 key="exit",
@@ -935,7 +941,7 @@ class S3_Operation:
                 table_name=table_name,
             )
 
-            return file_objs
+            return file_objects
 
         except Exception as e:
             self.log_writer.exception_log(
@@ -950,7 +956,7 @@ class S3_Operation:
         Method Name :   load_model
         Description :   This method loads the model from s3 bucket
 
-        Output      :   A pandas series object consisting of runs for the particular experiment id
+        Output      :   A pandas series objectect consisting of runs for the particular experiment id
         On Failure  :   Write an exception log and then raise an exception
 
         Version     :   1.2
@@ -978,15 +984,15 @@ class S3_Operation:
                 table_name == table_name, log_info=f"Got {model_file} as model file",
             )
 
-            f_obj = self.get_file_object(
+            f_object = self.get_file_objectect(
                 file_name=model_name, bucket_name=bucket_name, table_name=table_name
             )
 
-            model_obj = self.read_object(
-                object=f_obj, table_name=table_name, decode=False
+            model_object = self.read_objectect(
+                objectect=f_object, table_name=table_name, decode=False
             )
 
-            model = pickle.loads(model_obj)
+            model = pickle.loads(model_object)
 
             self.log_writer.log(
                 table_name=table_name,
@@ -1015,7 +1021,7 @@ class S3_Operation:
         Method Name :   save_model
         Description :   This method saves the model into particular model directory in s3 bucket with kwargs
 
-        Output      :   A pandas series object consisting of runs for the particular experiment id
+        Output      :   A pandas series objectect consisting of runs for the particular experiment id
         On Failure  :   Write an exception log and then raise an exception
 
         Version     :   1.2

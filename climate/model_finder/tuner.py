@@ -1,16 +1,16 @@
 from sklearn.ensemble import RandomForestRegressor
-from utils.logger import app_logger
-from utils.model_utils import get_model_name, get_model_params, get_model_score
+from utils.logger import App_Logger
+from utils.model_utils import Model_Utils
 from utils.read_params import read_params
 from xgboost import XGBRegressor
 
 
 class model_finder:
     """
-    This class shall  be used to find the model with best accuracy and AUC score.
-    Written By: iNeuron Intelligence
-    Version: 1.0
-    Revisions: None
+    Description :   This class shall  be used to find the model with best accuracy and AUC score.
+    Written By  :   iNeuron Intelligence
+    Version     :   1.0
+    Revisions   :   None
     """
 
     def __init__(self, table_name):
@@ -20,21 +20,20 @@ class model_finder:
 
         self.config = read_params()
 
-        self.cv = self.config["model_utils"]["cv"]
+        self.log_writer = App_Logger()
 
-        self.verbose = self.config["model_utils"]["verbose"]
-
-        self.log_writer = app_logger()
+        self.model_utils = Model_Utils()
 
         self.rf_model = RandomForestRegressor()
 
-        self.xgb_model = XGBRegressor(objective="binary:logistic")
+        self.xgb_model = XGBRegressor(objectective="binary:logistic")
 
     def get_best_model_for_random_forest(self, train_x, train_y):
         """
         Method Name :   get_best_model_for_random_forest
         Description :   get the parameters for Random Forest Algorithm which give the best accuracy.
                         Use Hyper Parameter Tuning.
+        
         Output      :   The model with the best parameters
         On Failure  :   Write an exception log and then raise an exception
 
@@ -52,11 +51,11 @@ class model_finder:
         )
 
         try:
-            self.rf_model_name = get_model_name(
+            self.rf_model_name = self.model_utils.get_model_name(
                 model=self.rf_model, table_name=self.table_name
             )
 
-            self.rf_best_params = get_model_params(
+            self.rf_best_params = self.model_utils.get_model_params(
                 model=self.rf_model,
                 model_key_name="rf_model",
                 x_train=train_x,
@@ -118,6 +117,7 @@ class model_finder:
         Method Name :   get_best_params_for_xgboost
         Description :   get the parameters for XGBoost Algorithm which give the best accuracy.
                         Use Hyper Parameter Tuning.
+        
         Output      :   The model with the best parameters
         On Failure  :   Write an exception log and then raise an exception
 
@@ -135,11 +135,11 @@ class model_finder:
         )
 
         try:
-            self.xgb_model_name = get_model_name(
+            self.xgb_model_name = self.model_utils.get_model_name(
                 model=self.xgb_model, table_name=self.table_name
             )
 
-            self.xgb_best_params = get_model_params(
+            self.xgb_best_params = self.model_utils.get_model_params(
                 model=self.xgb_model,
                 model_key_name="xgb_model",
                 x_train=train_x,
@@ -197,7 +197,7 @@ class model_finder:
         """
         Method Name :   get_trained_models
         Description :   Find out the Model which has the best score.
-        Output      :   The best model name and the model object
+        Output      :   The best model name and the model objectect
         On Failure  :   Write an exception log and then raise an exception
 
         Written By  :   iNeuron Intelligence
@@ -216,7 +216,7 @@ class model_finder:
         try:
             xgb_model = self.get_best_params_for_xgboost(train_x, train_y)
 
-            xgb_model_score = get_model_score(
+            xgb_model_score = self.model_utils.get_model_score(
                 model=xgb_model,
                 test_x=test_x,
                 test_y=test_y,
@@ -225,7 +225,7 @@ class model_finder:
 
             rf_model = self.get_best_model_for_random_forest(train_x, train_y)
 
-            rf_model_score = get_model_score(
+            rf_model_score = self.model_utils.get_model_score(
                 model=rf_model,
                 test_x=test_x,
                 test_y=test_y,

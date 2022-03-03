@@ -91,7 +91,7 @@ class MLFlow_Operation:
         Method Name :   get_runs_from_mlflow
         Description :   This method gets the runs from the mlflow server for a particular experiment id
 
-        Output      :   A pandas series object consisting of runs for the particular experiment id
+        Output      :   A pandas series objectect consisting of runs for the particular experiment id
         On Failure  :   Write an exception log and then raise an exception
 
         Version     :   1.2

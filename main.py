@@ -48,23 +48,23 @@ async def trainRouteClient():
     try:
         raw_data_train_bucket_name = config["s3_bucket"]["climate_raw_data_bucket"]
 
-        table_obj = create_log_table()
+        table_object = create_log_table()
 
-        table_obj.generate_log_tables(type="train")
+        table_object.generate_log_tables(type="train")
 
         time.sleep(5)
 
-        train_val_obj = train_validation(bucket_name=raw_data_train_bucket_name)
+        train_val_object = train_validation(bucket_name=raw_data_train_bucket_name)
 
-        train_val_obj.training_validation()
+        train_val_object.training_validation()
 
-        train_model_obj = train_model()
+        train_model_object = train_model()
 
-        num_clusters = train_model_obj.training_model()
+        num_clusters = train_model_object.training_model()
 
-        load_prod_model_obj = load_prod_model(num_clusters=num_clusters)
+        load_prod_model_object = load_prod_model(num_clusters=num_clusters)
 
-        load_prod_model_obj.load_production_model()
+        load_prod_model_object.load_production_model()
 
     except Exception as e:
         return Response("Error Occurred! %s" % e)
@@ -77,9 +77,9 @@ async def predictRouteClient():
     try:
         raw_data_pred_bucket_name = config["s3_bucket"]["climate_raw_data_bucket"]
 
-        table_obj = create_log_table()
+        table_object = create_log_table()
 
-        table_obj.generate_log_tables(type="pred")
+        table_object.generate_log_tables(type="pred")
 
         pred_val = pred_validation(raw_data_pred_bucket_name)
 
