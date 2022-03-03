@@ -1,4 +1,4 @@
-from climate.data_transform.data_transformation_train import data_transform_train
+from climate.data_transform.data_transformation_train import Data_Transform_Train
 from climate.data_type_valid.data_type_valid_train import db_operation_train
 from climate.raw_data_validation.train_data_validation import raw_train_data_validation
 from utils.logger import app_logger
@@ -16,7 +16,7 @@ class train_validation:
     def __init__(self, bucket_name):
         self.raw_data = raw_train_data_validation(raw_data_bucket_name=bucket_name)
 
-        self.data_transform = data_transform_train()
+        self.data_transform = Data_Transform_Train()
 
         self.db_operation = db_operation_train()
 

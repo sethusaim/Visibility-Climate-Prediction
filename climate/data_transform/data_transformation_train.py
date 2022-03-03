@@ -1,11 +1,11 @@
-from climate.s3_bucket_operations.s3_operations import s3_operations
-from utils.logger import app_logger
+from climate.s3_bucket_operations.s3_operations import S3_Operation
+from utils.logger import App_Logger
 from utils.read_params import read_params
 
 
-class data_transform_train:
+class Data_Transform_Train:
     """
-    Description :  This class shall be used for transforming the training batch data before loading it in Database!!.
+    Description :  This class shall be used for transforming the trainiction batch data before loading it in Database!!.
 
     Version     :   1.2
     Revisions   :   None
@@ -14,13 +14,13 @@ class data_transform_train:
     def __init__(self):
         self.config = read_params()
 
-        self.train_data_bucket = self.config["s3_bucket"]["climate_train_data_bucket"]
+        self.train_data_bucket = self.config["s3_bucket"]["climate_train_data"]
 
-        self.s3 = s3_operations()
+        self.s3 = S3_Operation()
 
-        self.log_writer = app_logger()
+        self.log_writer = App_Logger()
 
-        self.good_train_data_dir = self.config["data"]["train"]["good_data_dir"]
+        self.good_train_data_dir = self.config["data"]["train"]["good"]
 
         self.class_name = self.__class__.__name__
 
@@ -44,11 +44,10 @@ class data_transform_train:
         )
 
         try:
-            lst = self.s3.read_csv(
-                bucket=self.train_data_bucket,
-                file_name=self.good_train_data_dir,
-                folder=True,
-                table_name=self.train_data_transform_log,
+            lst = self.s3.read_csv_from_folder(
+                folder_name=self.good_train_data_dir,
+                bucket_name=self.train_data_bucket,
+                table_name=self.train_data_transform_log
             )
 
             for idx, f in enumerate(lst):
@@ -68,10 +67,10 @@ class data_transform_train:
 
                     self.s3.upload_df_as_csv(
                         data_frame=df,
-                        file_name=abs_f,
-                        bucket=self.train_data_bucket,
-                        dest_file_name=file,
-                        table_name=self.train_data_transform_log,
+                        local_file_name=abs_f,
+                        bucket_file_name=file,
+                        bucket_name=self.train_data_bucket,
+                        table_name=self.train_data_transform_log
                     )
 
                 else:
