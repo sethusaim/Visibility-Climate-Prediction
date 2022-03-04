@@ -1,4 +1,4 @@
-# Scania Truck Failure AWS System
+# Visiblity Climate Prediction AWS System
 
 This is an end to end machine learning system for predicting the visibility distance based on the given different climatic indicators in the training data. This entire solution is built using AWS Services like AWS S3 buckets (for storing the data), AWS DynamoDB (for logging and improvising the system performance), AWS Elastic Container Registry (for storing the container images), and AWS Elastic Container Service (for running the container image). Apart from AWS services, MLFlow was used for experiment tracking and model versioning and model staging with artifacts stored in AWS S3 bucket. Docker for containerization of application. 
 
