@@ -43,8 +43,8 @@ The solution application is exposed as API using FastAPI and application is dock
 - AWS Container Service for running the container applications
 
 ### Algorithms Used 
-- Random Forest Classifier Model
-- XGBoost Classifier Model
+- Random Forest Regressor Model
+- XGBoost Regressor Model
 
 ### Metrics 
 - R2 score
