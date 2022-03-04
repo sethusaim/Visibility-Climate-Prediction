@@ -6,7 +6,7 @@ This is an end to end machine learning system for predicting the visibility dist
 To build a classification methodology to visibility distance based on the given different climatic indicators in the training data.  
 
 ### Approach to building the solution
-In the first place, whenever we start a machine learning project, we need to sign a data sharing agreement with the client, where sign off some of the parameters like,
+In the first place, whenever we start a machine learning project, w e need to sign a data sharing agreement with the client, where sign off some of the parameters like,
 
     1. Format of data - like csv format or json format,etc
     2. Number of Columns
@@ -47,8 +47,7 @@ The solution application is exposed as API using FastAPI and application is dock
 - XGBoost Classifier Model
 
 ### Metrics 
-- Accuracy
-- ROC AUC score
+- R2 score
 
 ### Cloud Deployment 
 - CI-CD deployment to AWS Elastic Container Service
