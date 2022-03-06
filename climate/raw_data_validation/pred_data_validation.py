@@ -9,9 +9,9 @@ class Raw_Pred_Data_Validation:
     """
     Description :   This method is used for validating the raw prediction data
     Written by  :   iNeuron Intelligence
-    
+
     Version     :   1.2
-    Revisions   :   Moved to setup to cloud 
+    Revisions   :   Moved to setup to cloud
     """
 
     def __init__(self, raw_data_bucket_name):
@@ -25,9 +25,9 @@ class Raw_Pred_Data_Validation:
 
         self.s3 = S3_Operation()
 
-        self.pred_data_bucket = self.config["bucket"]["climate_pred_data"]
+        self.pred_data_bucket = self.config["s3_bucket"]["climate_pred_data"]
 
-        self.input_files_bucket = self.config["bucket"]["input_files"]
+        self.input_files_bucket = self.config["s3_bucket"]["input_files"]
 
         self.raw_pred_data_dir = self.config["data"]["raw_data"]["pred_batch"]
 
@@ -96,7 +96,8 @@ class Raw_Pred_Data_Validation:
             )
 
             self.log_writer.log(
-                table_name=self.pred_schema_log, log_info=message,
+                table_name=self.pred_schema_log,
+                log_info=message,
             )
 
             self.log_writer.start_log(
@@ -149,7 +150,8 @@ class Raw_Pred_Data_Validation:
             )
 
             self.log_writer.log(
-                table_name=self.pred_gen_log, log_info=f"Got {regex} pattern",
+                table_name=self.pred_gen_log,
+                log_info=f"Got {regex} pattern",
             )
 
             self.log_writer.start_log(

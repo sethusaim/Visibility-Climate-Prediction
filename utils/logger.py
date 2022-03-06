@@ -5,10 +5,10 @@ import boto3
 class App_Logger:
     """
     Description :   This class is used for logging the info to DynamoDB
-    
-    
+
+
     Version     :   1.2
-    Revisions   :   Moved to setup to cloud 
+    Revisions   :   Moved to setup to cloud
     """
 
     def __init__(self):

@@ -8,10 +8,10 @@ from utils.read_params import read_params
 class Model_Utils:
     """
     Description :   This class is used for all the model utils
-    
-    
+
+
     Version     :   1.2
-    Revisions   :   Moved to setup to cloud 
+    Revisions   :   Moved to setup to cloud
     """
 
     def __init__(self):
@@ -52,7 +52,8 @@ class Model_Utils:
             model_name = model.__class__.__name__
 
             self.log_writer.log(
-                table_name=table_name, log_info=f"Got the {model} model_name",
+                table_name=table_name,
+                log_info=f"Got the {model} model_name",
             )
 
             self.log_writer.start_log(
@@ -130,7 +131,7 @@ class Model_Utils:
         Method Name :   get_model_score
         Description :   This method gets model score againist the test data
 
-        Output      :   A model score is returned 
+        Output      :   A model score is returned
         On Failure  :   Write an exception log and then raise an exception
 
         Version     :   1.2

@@ -11,10 +11,10 @@ from utils.read_params import read_params
 class MLFlow_Operation:
     """
     Description :    This class shall be used for handling all the mlflow operations
-    
-    
+
+
     Version     :   1.2
-    Revisions   :   Moved to setup to cloud 
+    Revisions   :   Moved to setup to cloud
     """
 
     def __init__(self, table_name):
@@ -49,7 +49,7 @@ class MLFlow_Operation:
         On Failure  :   Write an exception log and then raise an exception
 
         Version     :   1.2
-        
+
         Revisions   :   moved setup to cloud
         """
         method_name = self.get_experiment_from_mlflow.__name__
@@ -95,7 +95,7 @@ class MLFlow_Operation:
         On Failure  :   Write an exception log and then raise an exception
 
         Version     :   1.2
-        
+
         Revisions   :   moved setup to cloud
         """
         method_name = self.get_runs_from_mlflow.__name__
@@ -141,7 +141,7 @@ class MLFlow_Operation:
         On Failure  :   Write an exception log and then raise an exception
 
         Version     :   1.2
-        
+
         Revisions   :   moved setup to cloud
         """
         method_name = self.set_mlflow_experiment.__name__
@@ -185,7 +185,7 @@ class MLFlow_Operation:
         On Failure  :   Write an exception log and then raise an exception
 
         Version     :   1.2
-        
+
         Revisions   :   moved setup to cloud
         """
         method_name = self.get_mlflow_client.__name__
@@ -231,7 +231,7 @@ class MLFlow_Operation:
         On Failure  :   Write an exception log and then raise an exception
 
         Version     :   1.2
-        
+
         Revisions   :   moved setup to cloud
         """
         method_name = self.get_remote_server_uri.__name__
@@ -247,7 +247,8 @@ class MLFlow_Operation:
             remote_server_uri = os.environ["MLFLOW_TRACKING_URI"]
 
             self.log_writer.log(
-                table_name=self.table_name, log_info="Got mlflow tracking uri",
+                table_name=self.table_name,
+                log_info="Got mlflow tracking uri",
             )
 
             self.log_writer.start_log(
@@ -270,13 +271,13 @@ class MLFlow_Operation:
     def set_mlflow_tracking_uri(self):
         """
         Method Name :   set_mlflow_tracking_uri
-        Description :   This method sets the mlflow tracking uri in mlflow server 
+        Description :   This method sets the mlflow tracking uri in mlflow server
 
-        Output      :   MLFLow server will set the particular uri to communicate with code 
+        Output      :   MLFLow server will set the particular uri to communicate with code
         On Failure  :   Write an exception log and then raise an exception
 
         Version     :   1.2
-        
+
         Revisions   :   moved setup to cloud
         """
         method_name = self.set_mlflow_tracking_uri.__name__
@@ -294,7 +295,8 @@ class MLFlow_Operation:
             mlflow.set_tracking_uri(server_uri)
 
             self.log_writer.log(
-                table_name=self.table_name, log_info="Set mlflow tracking uri",
+                table_name=self.table_name,
+                log_info="Set mlflow tracking uri",
             )
 
             self.log_writer.start_log(
@@ -321,7 +323,7 @@ class MLFlow_Operation:
         On Failure  :   Write an exception log and then raise an exception
 
         Version     :   1.2
-        
+
         Revisions   :   moved setup to cloud
         """
         method_name = self.get_mlflow_models.__name__
@@ -371,7 +373,7 @@ class MLFlow_Operation:
         On Failure  :   Write an exception log and then raise an exception
 
         Version     :   1.2
-        
+
         Revisions   :   moved setup to cloud
         """
         method_name = self.search_mlflow_models.__name__
@@ -421,7 +423,7 @@ class MLFlow_Operation:
         On Failure  :   Write an exception log and then raise an exception
 
         Version     :   1.2
-        
+
         Revisions   :   moved setup to cloud
         """
         method_name = self.log_model.__name__
@@ -470,7 +472,7 @@ class MLFlow_Operation:
         On Failure  :   Write an exception log and then raise an exception
 
         Version     :   1.2
-        
+
         Revisions   :   moved setup to cloud
         """
         method_name = self.log_metric.__name__
@@ -516,7 +518,7 @@ class MLFlow_Operation:
         On Failure  :   Write an exception log and then raise an exception
 
         Version     :   1.2
-        
+
         Revisions   :   moved setup to cloud
         """
         method_name = self.log_param.__name__
@@ -562,7 +564,7 @@ class MLFlow_Operation:
         On Failure  :   Write an exception log and then raise an exception
 
         Version     :   1.2
-        
+
         Revisions   :   moved setup to cloud
         """
         method_name = self.log_all_for_model.__name__
@@ -601,7 +603,10 @@ class MLFlow_Operation:
 
                 for param in model_params_list:
                     self.log_param(
-                        idx=idx, model=model, model_name=model_name, param=param,
+                        idx=idx,
+                        model=model,
+                        model_name=model_name,
+                        param=param,
                     )
 
                 self.log_model(model=model, model_name=model_name)
@@ -634,7 +639,7 @@ class MLFlow_Operation:
         On Failure  :   Write an exception log and then raise an exception
 
         Version     :   1.2
-        
+
         Revisions   :   moved setup to cloud
         """
         method_name = self.transition_mlflow_model.__name__

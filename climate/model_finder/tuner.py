@@ -33,7 +33,7 @@ class Model_Finder:
         Method Name :   get_best_model_for_random_forest
         Description :   get the parameters for Random Forest Algorithm which give the best accuracy.
                         Use Hyper Parameter Tuning.
-        
+
         Output      :   The model with the best parameters
         On Failure  :   Write an exception log and then raise an exception
 
@@ -117,7 +117,7 @@ class Model_Finder:
         Method Name :   get_best_params_for_xgboost
         Description :   get the parameters for XGBoost Algorithm which give the best accuracy.
                         Use Hyper Parameter Tuning.
-        
+
         Output      :   The model with the best parameters
         On Failure  :   Write an exception log and then raise an exception
 
@@ -243,5 +243,7 @@ class Model_Finder:
 
         except Exception as e:
             self.log_writer.exception_log(
-                error=e, class_name=self.class_name, method_name=method_name,
+                error=e,
+                class_name=self.class_name,
+                method_name=method_name,
             )

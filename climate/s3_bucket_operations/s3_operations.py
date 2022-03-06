@@ -15,9 +15,9 @@ class S3_Operation:
     """
     Description :   This method is used for all the S3 bucket_name operations
     Written by  :   iNeuron Intelligence
-    
+
     Version     :   1.2
-    Revisions   :   Moved to setup to cloud 
+    Revisions   :   Moved to setup to cloud
     """
 
     def __init__(self):
@@ -194,7 +194,7 @@ class S3_Operation:
     def get_df_from_object(self, object, table_name):
         """
         Method Name :   get_df_from_object
-        Description :   This method gets dataframe from object 
+        Description :   This method gets dataframe from object
 
         Output      :   Dataframe is read from the object
         On Failure  :   Write an exception log and then raise an exception
@@ -257,7 +257,9 @@ class S3_Operation:
 
         try:
             csv_obj = self.get_file_object(
-                file_name=file_name, bucket_name=bucket_name, table_name=table_name,
+                file_name=file_name,
+                bucket_name=bucket_name,
+                table_name=table_name,
             )
 
             df = self.get_df_from_object(object=csv_obj, table_name=table_name)
@@ -305,13 +307,17 @@ class S3_Operation:
         )
         try:
             files = self.get_files_from_folder(
-                folder_name=folder_name, bucket_name=bucket_name, table_name=table_name,
+                folder_name=folder_name,
+                bucket_name=bucket_name,
+                table_name=table_name,
             )
 
             lst = [
                 (
                     self.read_csv(
-                        file_name=f, bucket_name=bucket_name, table_name=table_name,
+                        file_name=f,
+                        bucket_name=bucket_name,
+                        table_name=table_name,
                     ),
                     f,
                     f.split("/")[-1],
@@ -389,7 +395,7 @@ class S3_Operation:
         Method Name :   create_folder
         Description :   This method creates a folder in s3 bucket
 
-        Output      :   A folder is created in s3 bucket 
+        Output      :   A folder is created in s3 bucket
         On Failure  :   Write an exception log and then raise an exception
 
         Version     :   1.2
@@ -408,7 +414,8 @@ class S3_Operation:
             self.load_object(bucket_name=bucket_name, object=folder_name)
 
             self.log_writer.log(
-                table_name=table_name, log_info=f"Folder {folder_name} already exists.",
+                table_name=table_name,
+                log_info=f"Folder {folder_name} already exists.",
             )
 
             self.log_writer.start_log(
@@ -564,7 +571,7 @@ class S3_Operation:
     def get_bucket(self, bucket_name, table_name):
         """
         Method Name :   get_bucket
-        Description :   This method gets the bucket from s3 
+        Description :   This method gets the bucket from s3
 
         Output      :   A s3 bucket name is returned based on the bucket_name
         On Failure  :   Write an exception log and then raise an exception
@@ -585,7 +592,8 @@ class S3_Operation:
             bucket_name = self.s3_resource.Bucket(bucket_name)
 
             self.log_writer.log(
-                table_name=table_name, log_info=f"Got {bucket_name} bucket_name",
+                table_name=table_name,
+                log_info=f"Got {bucket_name} bucket_name",
             )
 
             self.log_writer.start_log(
@@ -822,7 +830,10 @@ class S3_Operation:
         )
 
         try:
-            bucket = self.get_bucket(bucket_name=bucket_name, table_name=table_name,)
+            bucket = self.get_bucket(
+                bucket_name=bucket_name,
+                table_name=table_name,
+            )
 
             lst_objs = [object for object in bucket.objects.filter(Prefix=file_name)]
 
@@ -882,7 +893,8 @@ class S3_Operation:
             model_file = func()
 
             self.log_writer.log(
-                table_name == table_name, log_info=f"Got {model_file} as model file",
+                table_name == table_name,
+                log_info=f"Got {model_file} as model file",
             )
 
             f_obj = self.get_file_object(

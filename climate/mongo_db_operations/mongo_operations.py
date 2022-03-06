@@ -11,9 +11,9 @@ class MongoDB_Operation:
     """
     Description :   This method is used for all mongodb operations
     Written by  :   iNeuron Intelligence
-    
+
     Version     :   1.2
-    Revisions   :   Moved to setup to cloud 
+    Revisions   :   Moved to setup to cloud
     """
 
     def __init__(self):
@@ -149,7 +149,8 @@ class MongoDB_Operation:
                 df = df.drop(columns=["_id"], axis=1)
 
             self.log_writer.log(
-                table_name=table_name, log_info="Converted collection to dataframe",
+                table_name=table_name,
+                log_info="Converted collection to dataframe",
             )
 
             self.log_writer.start_log(
@@ -195,7 +196,8 @@ class MongoDB_Operation:
             records = json.loads(data_frame.T.to_json()).values()
 
             self.log_writer.log(
-                table_name=table_name, log_info=f"Converted dataframe to json records",
+                table_name=table_name,
+                log_info=f"Converted dataframe to json records",
             )
 
             database = self.get_database(db_name, table_name=table_name)

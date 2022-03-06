@@ -5,10 +5,10 @@ from utils.read_params import read_params
 class Create_Log_Table:
     """
     Description :   This class shall be used for creating the log tables in DynamoDB
-    
-    
+
+
     Version     :   1.2
-    Revisions   :   Moved to setup to cloud 
+    Revisions   :   Moved to setup to cloud
     """
 
     def __init__(self):

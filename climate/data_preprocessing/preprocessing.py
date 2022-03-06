@@ -39,7 +39,7 @@ class Preprocessor:
         """
         Method Name :   remove_columns
         Description :   This method removes the given columns from a pandas dataframe.
-        
+
         Output      :   A pandas dataframe after removing the specified columns.
         On Failure  :   Write an exception log and then raise an exception
 
@@ -92,10 +92,10 @@ class Preprocessor:
         """
         Method Name :   separate_label_feature
         Description :   This method separates the features and a Label Coulmns.
-        
+
         Output      :   Returns two separate Dataframes, one containing features and the other containing Labels .
         On Failure  :   Write an exception log and then raise an exception
-        
+
         Written By  :   iNeuron Intelligence
         Version     :   1.2
         Revisions   :   moved setup to cloud
@@ -115,7 +115,8 @@ class Preprocessor:
             self.Y = data[label_column_name]
 
             self.log_writer.log(
-                table_name=self.table_name, log_info="Label Separation Successful",
+                table_name=self.table_name,
+                log_info="Label Separation Successful",
             )
 
             self.log_writer.start_log(
@@ -129,7 +130,8 @@ class Preprocessor:
 
         except Exception as e:
             self.log_writer.log(
-                table_name=self.table_name, log_info="Label Separation Unsuccessful",
+                table_name=self.table_name,
+                log_info="Label Separation Unsuccessful",
             )
 
             self.log_writer.exception_log(
@@ -143,10 +145,10 @@ class Preprocessor:
         """
         Method Name :   drop_unnecessary_columns
         Description :   This method drop unnecessary columns in the dataframe
-        
+
         Output      :   Unnecessary columns are dropped in the dataframe
         On Failure  :   Write an exception log and then raise an exception
-        
+
         Written By  :   iNeuron Intelligence
         Version     :   1.2
         Revisions   :   moved setup to cloud
@@ -187,11 +189,11 @@ class Preprocessor:
     def replace_invalid_with_null(self, data):
         """
         Method Name :   replace_invalid_with_null
-        Description :   This method replaces invalid values with null 
-        
+        Description :   This method replaces invalid values with null
+
         Output      :   A dataframe where invalid values are replaced with null
         On Failure  :   Write an exception log and then raise an exception
-        
+
         Written By  :   iNeuron Intelligence
         Version     :   1.2
         Revisions   :   moved setup to cloud
@@ -238,11 +240,11 @@ class Preprocessor:
         """
         Method Name :   is_null_present
         Description :   This method checks whether there are null values present in the pandas dataframe or not.
-        
+
         Output      :   Returns True if null values are present in the dataframe, False if they are not present and
                         returns the list of columns for which null values are present.
         On Failure  :   Write an exception log and then raise an exception
-        
+
         Written By  :   iNeuron Intelligence
         Version     :   1.2
         Revisions   :   moved setup to cloud
@@ -303,7 +305,8 @@ class Preprocessor:
 
         except Exception as e:
             self.log_writer.log(
-                table_name=self.table_name, log_info="Finding missing values failed",
+                table_name=self.table_name,
+                log_info="Finding missing values failed",
             )
 
             self.log_writer.exception_log(
@@ -317,10 +320,10 @@ class Preprocessor:
         """
         Method Name :   encode_target_cols
         Description :   This method encodes all the categorical values in the training set.
-        
+
         Output      :   A dataframe which has all the categorical values encoded.
         On Failure  :   Write an exception log and then raise an exception
-        
+
         Written By  :   iNeuron Intelligence
         Version     :   1.2
         Revisions   :   moved setup to cloud
@@ -365,7 +368,7 @@ class Preprocessor:
         """
         Method Name : apply_standard_scaler
         Description : This method replaces all the missing values in the dataframe using KNN Imputer.
-        
+
         Output      : A dataframe which has all the missing values imputed.
         On Failure  : Raise Exception
 
@@ -413,7 +416,7 @@ class Preprocessor:
         """
         Method Name : impute_missing_values
         Description : This method replaces all the missing values in the dataframe using KNN Imputer.
-        
+
         Output      : A dataframe which has all the missing values imputed.
         On Failure  : Raise Exception
 
@@ -486,10 +489,10 @@ class Preprocessor:
         """
         Method Name :   get_columns_with_zero_std_deviation
         Description :   This method finds out the columns which have a standard deviation of zero.
-        
+
         Output      :   List of the columns with standard deviation of zero
         On Failure  :   Write an exception log and then raise an exception
-        
+
         Written By  :   iNeuron Intelligence
         Version     :   1.2
         Revisions   :   moved setup to cloud

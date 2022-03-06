@@ -9,9 +9,9 @@ from utils.read_params import read_params
 class KMeans_Clustering:
     """
     Description :   This class shall be used to divide the data into clusters before training.
-    
+
     Version     :   1.2
-    Revisions   :   Moved to setup to cloud 
+    Revisions   :   Moved to setup to cloud
     """
 
     def __init__(self, table_name):
@@ -19,9 +19,9 @@ class KMeans_Clustering:
 
         self.config = read_params()
 
-        self.input_files_bucket = self.config["bucket"]["input_files"]
+        self.input_files_bucket = self.config["s3_bucket"]["input_files"]
 
-        self.model_bucket_name = self.config["bucket"]["climate_model"]
+        self.model_bucket_name = self.config["s3_bucket"]["climate_model"]
 
         self.random_state = self.config["base"]["random_state"]
 
@@ -47,12 +47,12 @@ class KMeans_Clustering:
         """
         Method Name :   elbow_plot
         Description :   This method saves the plot to s3 bucket and decides the optimum number of clusters to the file.
-        
+
         Output      :   An elbow plot figure saved to input files bucket
         On Failure  :   Write an exception log and then raise an exception
-        
+
         Version     :   1.2
-        Revisions   :   Moved to setup to cloud 
+        Revisions   :   Moved to setup to cloud
         """
         method_name = self.elbow_plot.__name__
 
@@ -130,12 +130,12 @@ class KMeans_Clustering:
         """
         Method Name :   create_clusters
         Description :   Create a new dataframe consisting of the cluster information.
-        
+
         Output      :   A dataframe with cluster column
         On Failure  :   Write an exception log and then raise an exception
-        
+
         Version     :   1.2
-        Revisions   :   Moved to setup to cloud 
+        Revisions   :   Moved to setup to cloud
         """
         method_name = self.create_clusters.__name__
 

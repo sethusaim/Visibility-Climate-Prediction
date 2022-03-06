@@ -9,9 +9,9 @@ class Train_Validation:
     """
     Description :   This class is used for validating all the training batch files
     Written by  :   iNeuron Intelligence
-    
+
     Version     :   1.2
-    Revisions   :   Moved to setup to cloud 
+    Revisions   :   Moved to setup to cloud
     """
 
     def __init__(self, bucket_name):
@@ -79,7 +79,8 @@ class Train_Validation:
             )
 
             self.log_writer.log(
-                table_name=self.train_main_log, log_info="Starting Data Transformation",
+                table_name=self.train_main_log,
+                log_info="Starting Data Transformation",
             )
 
             self.data_transform.add_quotes_to_string()

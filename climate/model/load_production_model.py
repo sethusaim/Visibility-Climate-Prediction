@@ -7,10 +7,10 @@ from utils.read_params import read_params
 class Load_Prod_Model:
     """
     Description :   This class shall be used for loading the production model
-    
-    
+
+
     Version     :   1.2
-    Revisions   :   Moved to setup to cloud 
+    Revisions   :   Moved to setup to cloud
     """
 
     def __init__(self, num_clusters):
@@ -22,7 +22,7 @@ class Load_Prod_Model:
 
         self.num_clusters = num_clusters
 
-        self.model_bucket_name = self.config["bucket"]["climate_model"]
+        self.model_bucket_name = self.config["s3_bucket"]["climate_model"]
 
         self.load_prod_model_log = self.config["train_db_log"]["Load_Prod_Model"]
 
@@ -45,7 +45,7 @@ class Load_Prod_Model:
         On Failure  :   Write an exception log and then raise an exception
 
         Version     :   1.2
-        
+
         Revisions   :   moved setup to cloud
         """
         method_name = self.create_folders_for_prod_and_stag.__name__
@@ -94,7 +94,7 @@ class Load_Prod_Model:
         On Failure  :   Write an exception log and then raise an exception
 
         Version     :   1.2
-        
+
         Revisions   :   moved setup to cloud
         """
         method_name = self.load_production_model.__name__

@@ -7,10 +7,10 @@ from utils.read_params import read_params
 class DB_Operation_Pred:
     """
     Description :    This class shall be used for handling all the db operations
-    
-    
+
+
     Version     :   1.2
-    Revisions   :   Moved to setup to cloud 
+    Revisions   :   Moved to setup to cloud
     """
 
     def __init__(self):
@@ -18,13 +18,13 @@ class DB_Operation_Pred:
 
         self.class_name = self.__class__.__name__
 
-        self.pred_data_bucket = self.config["bucket"]["climate_pred_data"]
+        self.pred_data_bucket = self.config["s3_bucket"]["climate_pred_data"]
 
         self.pred_export_csv_file = self.config["export_csv_file"]["pred"]
 
         self.good_data_pred_dir = self.config["data"]["pred"]["good"]
 
-        self.input_files_bucket = self.config["bucket"]["input_files"]
+        self.input_files_bucket = self.config["s3_bucket"]["input_files"]
 
         self.pred_db_insert_log = self.config["pred_db_log"]["db_insert"]
 
@@ -45,7 +45,7 @@ class DB_Operation_Pred:
         On Failure  :   Write an exception log and then raise an exception
 
         Version     :   1.2
-        
+
         Revisions   :   moved setup to cloud
         """
         method_name = self.insert_good_data_as_record.__name__
@@ -109,7 +109,7 @@ class DB_Operation_Pred:
         On Failure  :   Write an exception log and then raise an exception
 
         Version     :   1.2
-        
+
         Revisions   :   moved setup to cloud
         """
         method_name = self.export_collection_to_csv.__name__
