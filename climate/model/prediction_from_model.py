@@ -219,9 +219,7 @@ class Prediction:
                     table_name=self.pred_log,
                 )
 
-            self.log_writer.log(
-                table_name=self.pred_log, log_info=f"End of Prediction"
-            )
+            self.log_writer.log(table_name=self.pred_log, log_info=f"End of Prediction")
 
             self.log_writer.start_log(
                 key="exit",

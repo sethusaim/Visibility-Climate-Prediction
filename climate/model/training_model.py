@@ -196,8 +196,7 @@ class train_model:
                     )
 
             self.log_writer.log(
-                table_name=self.model_train_log,
-                log_info="Successful End of Training",
+                table_name=self.model_train_log, log_info="Successful End of Training",
             )
 
             return number_of_clusters
