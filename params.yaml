@@ -104,8 +104,8 @@ mlflow_config:
   serialization_format : cloudpickle  
 
 db_log:
-  db_train_log : climate_training_logs
-  db_pred_log : climate_prediction_logs
+  train : climate_training_logs
+  pred : climate_prediction_logs
 
 train_db_log:
   model_training : modelTrainingLog
