@@ -13,8 +13,8 @@ class Model_Finder:
     Revisions   :   None
     """
 
-    def __init__(self, table_name):
-        self.table_name = table_name
+    def __init__(self, log_file):
+        self.log_file = log_file
 
         self.class_name = self.__class__.__name__
 
@@ -44,72 +44,53 @@ class Model_Finder:
         method_name = self.get_best_model_for_random_forest.__name__
 
         self.log_writer.start_log(
-            key="start",
-            class_name=self.class_name,
-            method_name=method_name,
-            table_name=self.table_name,
+            "start",
+            self.class_name,
+            method_name,
+            self.log_file,
         )
 
         try:
-            self.rf_model_name = self.model_utils.get_model_name(
-                model=self.rf_model, table_name=self.table_name
-            )
+            self.rf_model_name = self.rf_model.__class__.__name__
 
             self.rf_best_params = self.model_utils.get_model_params(
-                model=self.rf_model,
-                model_key_name="rf_model",
-                x_train=train_x,
-                y_train=train_y,
-                table_name=self.table_name,
-            )
-
-            self.criterion = self.rf_best_params["criterion"]
-
-            self.max_depth = self.rf_best_params["max_depth"]
-
-            self.max_features = self.rf_best_params["max_features"]
-
-            self.n_estimators = self.rf_best_params["n_estimators"]
-
-            self.log_writer.log(
-                table_name=self.table_name,
-                log_info=f"{self.rf_model_name} model best params are {self.rf_best_params}",
-            )
-
-            rf_model = RandomForestRegressor(
-                n_estimators=self.n_estimators,
-                criterion=self.criterion,
-                max_depth=self.max_depth,
-                max_features=self.max_features,
+                self.rf_model, train_x, train_y, self.log_file
             )
 
             self.log_writer.log(
-                table_name=self.table_name,
-                log_info=f"Initialized {self.rf_model_name} with {self.rf_best_params} as params",
+                self.log_file,
+                f"{self.rf_model_name} model best params are {self.rf_best_params}",
             )
 
-            rf_model.fit(train_x, train_y)
+            self.rf_model.set_params(**self.rf_best_params)
 
             self.log_writer.log(
-                table_name=self.table_name,
-                log_info=f"Created {self.rf_model_name} based on the {self.rf_best_params} as params",
+                self.log_file,
+                f"Initialized {self.rf_model_name} with {self.rf_best_params} as params",
+            )
+
+            self.rf_model.fit(train_x, train_y)
+
+            self.log_writer.log(
+                self.log_file,
+                f"Created {self.rf_model_name} based on the {self.rf_best_params} as params",
             )
 
             self.log_writer.start_log(
-                key="exit",
-                class_name=self.class_name,
-                method_name=method_name,
-                table_name=self.table_name,
+                "exit",
+                self.class_name,
+                method_name,
+                self.log_file,
             )
 
-            return rf_model
+            return self.rf_model
 
         except Exception as e:
             self.log_writer.exception_log(
-                error=e,
-                class_name=self.class_name,
-                method_name=method_name,
-                table_name=self.table_name,
+                e,
+                self.class_name,
+                method_name,
+                self.log_file,
             )
 
     def get_best_params_for_xgboost(self, train_x, train_y):
@@ -128,69 +109,53 @@ class Model_Finder:
         method_name = self.get_best_params_for_xgboost.__name__
 
         self.log_writer.start_log(
-            key="start",
-            class_name=self.class_name,
-            method_name=method_name,
-            table_name=self.table_name,
+            "start",
+            self.class_name,
+            method_name,
+            self.log_file,
         )
 
         try:
-            self.xgb_model_name = self.model_utils.get_model_name(
-                model=self.xgb_model, table_name=self.table_name
-            )
+            self.xgb_model_name = self.xgb_model.__class__.__name__
 
             self.xgb_best_params = self.model_utils.get_model_params(
-                model=self.xgb_model,
-                model_key_name="xgb_model",
-                x_train=train_x,
-                y_train=train_y,
-                table_name=self.table_name,
-            )
-
-            self.learning_rate = self.xgb_best_params["learning_rate"]
-
-            self.max_depth = self.xgb_best_params["max_depth"]
-
-            self.n_estimators = self.rf_best_params["n_estimators"]
-
-            self.log_writer.log(
-                table_name=self.table_name,
-                log_info=f"{self.xgb_model} model best params are {self.xgb_best_params}",
-            )
-
-            xgb_model = XGBRegressor(
-                learning_rate=self.learning_rate,
-                max_depth=self.max_depth,
-                n_estimators=self.n_estimators,
+                self.xgb_model, train_x, train_y, self.log_file
             )
 
             self.log_writer.log(
-                table_name=self.table_name,
-                log_info=f"Initialized {self.xgb_model_name} model with best params as {self.xgb_best_params}",
+                self.log_file,
+                f"{self.xgb_model} model best params are {self.xgb_best_params}",
             )
 
-            xgb_model.fit(train_x, train_y)
+            self.xgb_model.set_params(**self.xgb_best_params)
 
             self.log_writer.log(
-                table_name=self.table_name,
-                log_info=f"Created {self.xgb_model_name} model with best params as {self.xgb_best_params}",
+                self.log_file,
+                f"Initialized {self.xgb_model_name} model with best params as {self.xgb_best_params}",
+            )
+
+            self.xgb_model.fit(train_x, train_y)
+
+            self.log_writer.log(
+                self.log_file,
+                f"Created {self.xgb_model_name} model with best params as {self.xgb_best_params}",
             )
 
             self.log_writer.start_log(
-                key="exit",
-                class_name=self.class_name,
-                method_name=method_name,
-                table_name=self.table_name,
+                "exit",
+                self.class_name,
+                method_name,
+                self.log_file,
             )
 
-            return xgb_model
+            return self.xgb_model
 
         except Exception as e:
             self.log_writer.exception_log(
-                error=e,
-                class_name=self.class_name,
-                method_name=method_name,
-                table_name=self.table_name,
+                e,
+                self.class_name,
+                method_name,
+                self.log_file,
             )
 
     def get_trained_models(self, train_x, train_y, test_x, test_y):
@@ -207,43 +172,45 @@ class Model_Finder:
         method_name = self.get_trained_models.__name__
 
         self.log_writer.start_log(
-            key="start",
-            class_name=self.class_name,
-            method_name=method_name,
-            table_name=self.table_name,
+            "start",
+            self.class_name,
+            method_name,
+            self.log_file,
         )
 
         try:
-            xgb_model = self.get_best_params_for_xgboost(train_x, train_y)
+            self.xgb_model = self.get_best_params_for_xgboost(train_x, train_y)
 
-            xgb_model_score = self.model_utils.get_model_score(
-                model=xgb_model,
-                test_x=test_x,
-                test_y=test_y,
-                table_name=self.table_name,
+            self.xgb_model_score = self.model_utils.get_model_score(
+                self.xgb_model,
+                test_x,
+                test_y,
+                self.log_file,
             )
 
-            rf_model = self.get_best_model_for_random_forest(train_x, train_y)
+            self.rf_model = self.get_best_model_for_random_forest(train_x, train_y)
 
-            rf_model_score = self.model_utils.get_model_score(
-                model=rf_model,
-                test_x=test_x,
-                test_y=test_y,
-                table_name=self.table_name,
+            self.rf_model_score = self.model_utils.get_model_score(
+                self.rf_model,
+                test_x,
+                test_y,
+                self.log_file,
             )
 
             self.log_writer.start_log(
-                key="exit",
-                class_name=self.class_name,
-                method_name=method_name,
-                table_name=self.table_name,
+                "exit",
+                self.class_name,
+                method_name,
+                self.log_file,
             )
 
-            return xgb_model, xgb_model_score, rf_model, rf_model_score
+            lst = [(self.xgb_model,self.xgb_model_score),(self.rf_model,self.rf_model_score)]
+
+            return lst
 
         except Exception as e:
             self.log_writer.exception_log(
-                error=e,
-                class_name=self.class_name,
-                method_name=method_name,
+                e,
+                self.class_name,
+                method_name,
             )

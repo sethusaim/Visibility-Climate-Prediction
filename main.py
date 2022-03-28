@@ -1,6 +1,4 @@
 import json
-import os
-import time
 
 import uvicorn
 from fastapi import FastAPI, Request
@@ -13,11 +11,7 @@ from climate.model.prediction_from_model import Prediction
 from climate.model.training_model import train_model
 from climate.validation_insertion.prediction_validation_insertion import Pred_Validation
 from climate.validation_insertion.train_validation_insertion import Train_Validation
-from utils.log_tables import Create_Log_Table
 from utils.read_params import read_params
-
-os.putenv("LANG", "en_US.UTF-8")
-os.putenv("LC_ALL", "en_US.UTF-8")
 
 app = FastAPI()
 
@@ -46,15 +40,9 @@ async def index(request: Request):
 @app.get("/train")
 async def trainRouteClient():
     try:
-        raw_data_train_bucket_name = config["s3_bucket"]["climate_raw_data_bucket"]
+        raw_data_train_bucket = config["s3_bucket"]["climate_raw_data_bucket"]
 
-        table = Create_Log_Table()
-
-        table.generate_log_tables(type="train")
-
-        time.sleep(5)
-
-        train_val = Train_Validation(bucket_name=raw_data_train_bucket_name)
+        train_val = Train_Validation(raw_data_train_bucket)
 
         train_val.training_validation()
 
@@ -75,13 +63,9 @@ async def trainRouteClient():
 @app.get("/predict")
 async def predictRouteClient():
     try:
-        raw_data_pred_bucket_name = config["s3_bucket"]["climate_raw_data_bucket"]
+        raw_data_pred_bucket = config["s3_bucket"]["climate_raw_data_bucket"]
 
-        table = Create_Log_Table()
-
-        table.generate_log_tables(type="pred")
-
-        pred_val = Pred_Validation(raw_data_pred_bucket_name)
+        pred_val = Pred_Validation(raw_data_pred_bucket)
 
         pred_val.prediction_validation()
 

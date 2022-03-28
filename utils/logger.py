@@ -16,7 +16,7 @@ class App_Logger:
 
         self.class_name = self.__class__.__name__
 
-    def log(self, table_name, log_info):
+    def log(self, log_file, log_info):
         """
         Method Name :   log
         Description :   This method is used for logging the info to DynamoDB
@@ -31,7 +31,7 @@ class App_Logger:
         method_name = self.log.__name__
 
         try:
-            self.table = self.db_resource.Table(table_name)
+            self.table = self.db_resource.Table(log_file)
 
             self.now = datetime.now()
 
@@ -52,7 +52,7 @@ class App_Logger:
 
             raise Exception(error_msg)
 
-    def start_log(self, key, class_name, method_name, table_name):
+    def start_log(self, key, class_name, method_name, log_file):
         """
         Method Name :   start_log
         Description :   This method creates an entry point log in DynamoDB
@@ -71,14 +71,14 @@ class App_Logger:
 
             log_msg = f"{func()} {method_name} method of class {class_name}"
 
-            self.log(table_name, log_info=log_msg)
+            self.log(log_file, log_msg)
 
         except Exception as e:
             error_msg = f"Exception occured in Class : {self.class_name}, Method : {start_method_name}, Error : {str(e)}"
 
             raise Exception(error_msg)
 
-    def exception_log(self, error, class_name, method_name, table_name):
+    def exception_log(self, error, class_name, method_name, log_file):
         """
         Method Name :   exception_log
         Description :   This method creates an exception log in DynamoDB and raises Exception
@@ -91,14 +91,14 @@ class App_Logger:
         """
 
         self.start_log(
-            key="exit",
-            class_name=class_name,
-            method_name=method_name,
-            table_name=table_name,
+            "exit",
+            class_name,
+            method_name,
+            log_file,
         )
 
         exception_msg = f"Exception occured in Class : {class_name}, Method : {method_name}, Error : {str(error)}"
 
-        self.log(table_name=table_name, log_info=exception_msg)
+        self.log(log_file, exception_msg)
 
         raise Exception(exception_msg)

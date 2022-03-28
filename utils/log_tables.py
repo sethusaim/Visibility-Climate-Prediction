@@ -24,12 +24,12 @@ class Create_Log_Table:
 
         self.class_name = self.__class__.__name__
 
-    def Create_Log_Table(self, table_name):
+    def Create_Log_Table(self, log_file):
         """
         Method Name :   Create_Log_Table
         Description :   This method create a log table in DynamoDB
 
-        Output      :   A table is created in DynamoDB with table_name
+        Output      :   A table is created in DynamoDB with log_file
         On Failure  :   Write an exception log and then raise an exception
 
         Version     :   1.2
@@ -40,12 +40,12 @@ class Create_Log_Table:
         try:
             response = self.db_client.list_tables()
 
-            if table_name in response["TableNames"]:
+            if log_file in response["TableNames"]:
                 pass
 
             else:
                 self.db_resource.create_table(
-                    TableName=table_name,
+                    TableName=log_file,
                     KeySchema=[
                         {"AttributeName": "Log_updated_date", "KeyType": "HASH"},
                     ],
@@ -82,7 +82,7 @@ class Create_Log_Table:
             tables = func()
 
             for table in tables:
-                self.Create_Log_Table(table_name=table)
+                self.Create_Log_Table(table)
 
         except Exception as e:
             error_msg = f"Exception occured in Class : {self.class_name}, Method : {method_name}, Error : {str(e)}"
