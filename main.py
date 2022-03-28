@@ -8,7 +8,7 @@ from fastapi.templating import Jinja2Templates
 
 from climate.model.load_production_model import Load_Prod_Model
 from climate.model.prediction_from_model import Prediction
-from climate.model.training_model import train_model
+from climate.model.training_model import Train_model
 from climate.validation_insertion.prediction_validation_insertion import Pred_Validation
 from climate.validation_insertion.train_validation_insertion import Train_Validation
 from utils.read_params import read_params
@@ -46,7 +46,7 @@ async def trainRouteClient():
 
         train_val.training_validation()
 
-        train_model = train_model()
+        train_model = Train_model()
 
         num_clusters = train_model.training_model()
 
@@ -71,7 +71,7 @@ async def predictRouteClient():
 
         pred = Prediction()
 
-        bucket, filename, json_predictions = pred.predict_from_model()
+        bucket, filename, json_predictions = pred.predict_model()
 
         return Response(
             f"prediction file created in {bucket} bucket with filename as {filename}, and few of the predictions are {str(json.loads(json_predictions))}"

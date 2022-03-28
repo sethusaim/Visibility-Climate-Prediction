@@ -35,7 +35,7 @@ class Raw_Pred_Data_Validation:
 
         self.regex_file = self.config["regex_file"]
 
-        self.pred_schema_log = self.config["pred_db_log"]["values_from_schema"]
+        self.pred_schema_log = self.config["pred_db_log"]["values_schema"]
 
         self.good_pred_data_dir = self.config["data"]["pred"]["good"]
 
@@ -51,9 +51,9 @@ class Raw_Pred_Data_Validation:
             "missing_values_in_col"
         ]
 
-    def values_from_schema(self):
+    def values_schema(self):
         """
-        Method Name :   values_from_schema
+        Method Name :   values_schema
         Description :   This method gets schema values from the schema_prediction.json file
 
         Output      :   Schema values are extracted from the schema_prediction.json file
@@ -62,7 +62,7 @@ class Raw_Pred_Data_Validation:
         Version     :   1.2
         Revisions   :   moved setup to cloud
         """
-        method_name = self.values_from_schema.__name__
+        method_name = self.values_schema.__name__
 
         try:
             self.log_writer.start_log(
@@ -244,7 +244,7 @@ class Raw_Pred_Data_Validation:
         try:
             self.create_dirs_for_good_bad_data(self.pred_name_valid_log)
 
-            onlyfiles = self.s3.get_files_from_folder(
+            onlyfiles = self.s3.get_files_folder(
                 self.raw_data_bucket,
                 self.raw_pred_data_dir,
                 self.pred_name_valid_log,
@@ -277,35 +277,35 @@ class Raw_Pred_Data_Validation:
                     if len(splitAtDot[1]) == LengthOfDateStampInFile:
                         if len(splitAtDot[2]) == LengthOfTimeStampInFile:
                             self.s3.copy_data(
-                                from_raw_data_pred_file_name,
+                                raw_data_pred_file_name,
                                 self.pred_data_bucket,
-                                to_good_data_pred_file_name,
+                                good_data_pred_file_name,
                                 self.pred_data_bucket,
                                 self.pred_name_valid_log,
                             )
 
                         else:
                             self.s3.copy_data(
-                                from_raw_data_pred_file_name,
+                                raw_data_pred_file_name,
                                 self.pred_data_bucket,
-                                to_bad_data_pred_file_name,
+                                bad_data_pred_file_name,
                                 self.pred_data_bucket,
                                 self.pred_name_valid_log,
                             )
 
                     else:
                         self.s3.copy_data(
-                            from_raw_data_pred_file_name,
+                            raw_data_pred_file_name,
                             self.pred_data_bucket,
-                            to_bad_data_pred_file_name,
+                            bad_data_pred_file_name,
                             self.pred_data_bucket,
                             self.pred_name_valid_log,
                         )
                 else:
                     self.s3.copy_data(
-                        from_raw_data_pred_file_name,
+                        raw_data_pred_file_name,
                         self.pred_data_bucket,
-                        to_bad_data_pred_file_name,
+                        bad_data_pred_file_name,
                         self.pred_data_bucket,
                         self.pred_name_valid_log,
                     )
@@ -346,7 +346,7 @@ class Raw_Pred_Data_Validation:
         )
 
         try:
-            lst = self.s3.read_csv_from_folder(
+            lst = self.s3.read_csv_folder(
                 self.good_pred_data_dir,
                 self.pred_data_bucket,
                 self.pred_col_valid_log,
@@ -367,9 +367,9 @@ class Raw_Pred_Data_Validation:
                         dest_f = self.bad_pred_data_dir + "/" + abs_f
 
                         self.s3.move_data(
-                            from_file,
+                            file,
                             self.pred_data_bucket,
-                            to_dest_f,
+                            dest_f,
                             self.pred_data_bucket,
                             self.pred_col_valid_log,
                         )
@@ -413,7 +413,7 @@ class Raw_Pred_Data_Validation:
         )
 
         try:
-            lst = self.s3.read_csv_from_folder(
+            lst = self.s3.read_csv_folder(
                 self.good_pred_data_dir,
                 self.pred_data_bucket,
                 self.pred_missing_value_log,
@@ -436,9 +436,9 @@ class Raw_Pred_Data_Validation:
                             dest_f = self.bad_pred_data_dir + "/" + abs_f
 
                             self.s3.move_data(
-                                from_file,
+                                file,
                                 self.pred_data_bucket,
-                                to_dest_f,
+                                dest_f,
                                 self.pred_data_bucket,
                                 self.pred_missing_value_log,
                             )
@@ -450,8 +450,8 @@ class Raw_Pred_Data_Validation:
 
                         self.s3.upload_df_as_csv(
                             df,
-                            local_abs_f,
-                            bucket_dest_f,
+                            abs_f,
+                            dest_f,
                             self.pred_data_bucket,
                             self.pred_missing_value_log,
                         )

@@ -204,7 +204,10 @@ class Model_Finder:
                 self.log_file,
             )
 
-            lst = [(self.xgb_model,self.xgb_model_score),(self.rf_model,self.rf_model_score)]
+            lst = [
+                (self.xgb_model, self.xgb_model_score),
+                (self.rf_model, self.rf_model_score),
+            ]
 
             return lst
 

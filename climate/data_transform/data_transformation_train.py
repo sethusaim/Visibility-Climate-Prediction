@@ -26,15 +26,15 @@ class Data_Transform_Train:
 
         self.train_data_transform_log = self.config["train_db_log"]["data_transform"]
 
-    def add_quotes_to_string(self):
+    def add_quotes_string(self):
         """
-        Method Name :   add_quotes_to_string
+        Method Name :   add_quotes_string
         Description :   This method addes the quotes to the string data present in columns
 
         Version     :   1.2
         Revisions   :   moved setup to cloud
         """
-        method_name = self.add_quotes_to_string.__name__
+        method_name = self.add_quotes_string.__name__
 
         self.log_writer.start_log(
             "start",
@@ -44,7 +44,7 @@ class Data_Transform_Train:
         )
 
         try:
-            lst = self.s3.read_csv_from_folder(
+            lst = self.s3.read_csv_folder(
                 self.good_train_data_dir,
                 self.train_data_bucket,
                 self.train_data_transform_log,

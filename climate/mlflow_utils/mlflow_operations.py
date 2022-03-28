@@ -39,9 +39,9 @@ class MLFlow_Operation:
 
         self.model_save_format = self.config["model_utils"]["save_format"]
 
-    def get_experiment_from_mlflow(self, exp_name):
+    def get_experiment_mlflow(self, exp_name):
         """
-        Method Name :   get_experiment_from_mlflow
+        Method Name :   get_experiment_mlflow
         Description :   This method gets the experiment from mlflow server using the experiment name
 
         Output      :   An experiment which was stored in mlflow server
@@ -51,7 +51,7 @@ class MLFlow_Operation:
 
         Revisions   :   moved setup to cloud
         """
-        method_name = self.get_experiment_from_mlflow.__name__
+        method_name = self.get_experiment_mlflow.__name__
 
         self.log_writer.start_log("start", self.class_name, method_name, self.log_file)
 
@@ -74,9 +74,9 @@ class MLFlow_Operation:
                 e, self.class_name, method_name, self.log_file
             )
 
-    def get_runs_from_mlflow(self, exp_id):
+    def get_runs_mlflow(self, exp_id):
         """
-        Method Name :   get_runs_from_mlflow
+        Method Name :   get_runs_mlflow
         Description :   This method gets the runs from the mlflow server for a particular experiment id
 
         Output      :   A pandas series object consisting of runs for the particular experiment id
@@ -86,7 +86,7 @@ class MLFlow_Operation:
 
         Revisions   :   moved setup to cloud
         """
-        method_name = self.get_runs_from_mlflow.__name__
+        method_name = self.get_runs_mlflow.__name__
 
         self.log_writer.start_log("start", self.class_name, method_name, self.log_file)
 
@@ -456,9 +456,7 @@ class MLFlow_Operation:
                 e, self.class_name, method_name, self.log_file
             )
 
-    def transition_mlflow_model(
-        self, model_version, stage, model_name, from_bucket, to_bucket
-    ):
+    def transition_mlflow_model(self, model_version, stage, model_name, bucket):
         """
         Method Name :   transition_mlflow_model
         Description :   This method transitions mlflow model from one stage to other stage, and does the same in s3 bucket
@@ -520,9 +518,9 @@ class MLFlow_Operation:
 
                 self.s3.copy_data(
                     trained_model_file,
-                    from_bucket,
+                    bucket,
                     prod_model_file,
-                    to_bucket,
+                    bucket,
                     self.log_file,
                 )
 
@@ -543,9 +541,9 @@ class MLFlow_Operation:
 
                 self.s3.copy_data(
                     trained_model_file,
-                    from_bucket,
+                    bucket,
                     stag_model_file,
-                    to_bucket,
+                    bucket,
                     self.log_file,
                 )
 

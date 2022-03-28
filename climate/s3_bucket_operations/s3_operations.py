@@ -112,11 +112,9 @@ class S3_Operation:
         )
 
         try:
-            txt_obj = self.get_file_object(
-                file_name, bucket, log_file
-            )
+            txt_obj = self.get_file_object(file_name, bucket, log_file)
 
-            content = self.read_object(object=txt_obj, log_file)
+            content = self.read_object(txt_obj, log_file)
 
             self.log_writer.log(
                 log_file,
@@ -161,11 +159,9 @@ class S3_Operation:
         )
 
         try:
-            f_obj = self.get_file_object(
-                file_name, bucket, log_file
-            )
+            f_obj = self.get_file_object(file_name, bucket, log_file)
 
-            json_content = self.read_object(object=f_obj, log_file)
+            json_content = self.read_object(f_obj, log_file)
 
             dic = json.loads(json_content)
 
@@ -191,9 +187,9 @@ class S3_Operation:
                 log_file,
             )
 
-    def get_df_from_object(self, object, log_file):
+    def get_df_object(self, object, log_file):
         """
-        Method Name :   get_df_from_object
+        Method Name :   get_df_object
         Description :   This method gets dataframe from object
 
         Output      :   Dataframe is read from the object
@@ -202,7 +198,7 @@ class S3_Operation:
         Version     :   1.2
         Revisions   :   moved setup to cloud
         """
-        method_name = self.get_df_from_object.__name__
+        method_name = self.get_df_object.__name__
 
         self.log_writer.start_log(
             "start",
@@ -212,9 +208,7 @@ class S3_Operation:
         )
 
         try:
-            content = self.read_object(
-                object=object, log_file, make_readable=True
-            )
+            content = self.read_object(object, log_file, make_readable=True)
 
             df = pd.read_csv(content)
 
@@ -262,7 +256,7 @@ class S3_Operation:
                 log_file,
             )
 
-            df = self.get_df_from_object(object=csv_obj, log_file)
+            df = self.get_df_object(csv_obj, log_file)
 
             self.log_writer.log(
                 log_file,
@@ -286,9 +280,9 @@ class S3_Operation:
                 log_file,
             )
 
-    def read_csv_from_folder(self, folder_name, bucket, log_file):
+    def read_csv_folder(self, folder_name, bucket, log_file):
         """
-        Method Name :   read_csv_from_folder
+        Method Name :   read_csv_folder
         Description :   This method reads the csv files from folder
 
         Output      :   A list of tuple of dataframe, along with absolute file name and file name is returned
@@ -297,7 +291,7 @@ class S3_Operation:
         Version     :   1.2
         Revisions   :   moved setup to cloud
         """
-        method_name = self.read_csv_from_folder.__name__
+        method_name = self.read_csv_folder.__name__
 
         self.log_writer.start_log(
             "start",
@@ -306,7 +300,7 @@ class S3_Operation:
             log_file,
         )
         try:
-            files = self.get_files_from_folder(
+            files = self.get_files_folder(
                 folder_name,
                 bucket,
                 log_file,
@@ -411,7 +405,7 @@ class S3_Operation:
         )
 
         try:
-            self.load_object(bucket, object=folder_name)
+            self.load_object(bucket, folder_name)
 
             self.log_writer.log(
                 log_file,
@@ -432,9 +426,7 @@ class S3_Operation:
                     f"{folder_name} folder does not exist,creating new one",
                 )
 
-                self.put_object(
-                    object=folder_name, bucket, log_file
-                )
+                self.put_object(folder_name, bucket, log_file)
 
                 self.log_writer.log(
                     log_file,
@@ -497,9 +489,7 @@ class S3_Operation:
                 log_file,
             )
 
-    def upload_file(
-        self, from_file_name, to_file_name, bucket, log_file, remove=True
-    ):
+    def upload_file(self, file_name, bucket, log_file, remove=True):
         """
         Method Name :   upload_file
         Description :   This method uploades a file to s3 bucket with kwargs
@@ -522,16 +512,14 @@ class S3_Operation:
         try:
             self.log_writer.log(
                 log_file,
-                f"Uploading {from_file_name} to s3 bucket {bucket}",
+                f"Uploading {file_name} to s3 bucket {bucket}",
             )
 
-            self.s3_resource.meta.client.upload_file(
-                from_file_name, bucket, to_file_name
-            )
+            self.s3_resource.meta.client.upload_file(file_name, bucket, file_name)
 
             self.log_writer.log(
                 log_file,
-                f"Uploaded {from_file_name} to s3 bucket {bucket}",
+                f"Uploaded {file_name} to s3 bucket {bucket}",
             )
 
             if remove is True:
@@ -540,11 +528,11 @@ class S3_Operation:
                     f"Option remove is set {remove}..deleting the file",
                 )
 
-                os.remove(from_file_name)
+                os.remove(file_name)
 
                 self.log_writer.log(
                     log_file,
-                    f"Removed the local copy of {from_file_name}",
+                    f"Removed the local copy of {file_name}",
                 )
 
                 self.log_writer.start_log(
@@ -613,9 +601,7 @@ class S3_Operation:
                 log_file,
             )
 
-    def copy_data(
-        self, from_file_name, from_bucket, to_file_name, to_bucket, log_file
-    ):
+    def copy_data(self, file_name, bucket, log_file):
         """
         Method Name :   copy_data
         Description :   This method copies the data from one bucket to another bucket
@@ -636,13 +622,13 @@ class S3_Operation:
         )
 
         try:
-            copy_source = {"Bucket": from_bucket, "Key": from_file_name}
+            copy_source = {"Bucket": bucket, "Key": file_name}
 
-            self.s3_resource.meta.client.copy(copy_source, to_bucket, to_file_name)
+            self.s3_resource.meta.client.copy(copy_source, bucket, file_name)
 
             self.log_writer.log(
                 log_file,
-                f"Copied data from bucket {from_bucket} to bucket {to_bucket}",
+                f"Copied data from bucket {bucket} to bucket {bucket}",
             )
 
             self.log_writer.start_log(
@@ -703,9 +689,7 @@ class S3_Operation:
                 log_file,
             )
 
-    def move_data(
-        self, from_file_name, from_bucket, to_file_name, to_bucket, log_file
-    ):
+    def move_data(self, file_name, bucket, log_file):
         """
         Method Name :   move_data
         Description :   This method moves the data from one bucket to other bucket
@@ -727,22 +711,22 @@ class S3_Operation:
 
         try:
             self.copy_data(
-                from_from_bucket,
-                from_from_file_name,
-                to_to_bucket,
-                to_to_file_name,
+                bucket,
+                file_name,
+                bucket,
+                file_name,
                 log_file,
             )
 
             self.delete_file(
-                from_bucket,
-                file=from_file_name,
+                bucket,
+                file_name,
                 log_file,
             )
 
             self.log_writer.log(
                 log_file,
-                f"Moved {from_file_name} from bucket {from_bucket} to {to_bucket}",
+                f"Moved {file_name} from bucket {bucket} to {bucket}",
             )
 
             self.log_writer.start_log(
@@ -781,9 +765,7 @@ class S3_Operation:
         )
 
         try:
-            lst = self.get_file_object(
-                folder_name, bucket, log_file
-            )
+            lst = self.get_file_object(folder_name, bucket, log_file)
 
             list_of_files = [object.key for object in lst]
 
@@ -863,7 +845,7 @@ class S3_Operation:
                 log_file,
             )
 
-    def load_model(self, model_name, bucket, log_file, None):
+    def load_model(self, model_name, bucket, log_file, model_dir=None):
         """
         Method Name :   load_model
         Description :   This method loads the model from s3 bucket
@@ -897,13 +879,9 @@ class S3_Operation:
                 f"Got {model_file} as model file",
             )
 
-            f_obj = self.get_file_object(
-                model_name, bucket, log_file
-            )
+            f_obj = self.get_file_object(model_name, bucket, log_file)
 
-            model_obj = self.read_object(
-                object=f_obj, log_file, decode=False
-            )
+            model_obj = self.read_object(f_obj, log_file, decode=False)
 
             model = pickle.loads(model_obj)
 
@@ -950,9 +928,7 @@ class S3_Operation:
         )
 
         try:
-            model_name = self.model_utils.get_model_name(
-                model, log_file
-            )
+            model_name = self.model_utils.get_model_name(model, log_file)
 
             func = (
                 lambda: model_name + self.file_format
@@ -978,8 +954,8 @@ class S3_Operation:
             )
 
             self.upload_file(
-                from_model_file,
-                to_bucket_model_path,
+                model_file,
+                bucket_model_path,
                 model_bucket,
                 log_file,
             )
@@ -1032,7 +1008,7 @@ class S3_Operation:
         )
 
         try:
-            data_frame.to_csv(local_file_name, index=None, header=True)
+            data_frame.csv(local_file_name, index=None, header=True)
 
             self.log_writer.log(
                 log_file,
@@ -1040,8 +1016,8 @@ class S3_Operation:
             )
 
             self.upload_file(
-                from_local_file_name,
-                to_bucket_file_name,
+                local_file_name,
+                bucket_file_name,
                 bucket,
                 log_file,
             )

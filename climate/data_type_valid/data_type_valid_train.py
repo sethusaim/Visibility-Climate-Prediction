@@ -56,7 +56,7 @@ class DB_Operation_Train:
         )
 
         try:
-            lst = self.s3.read_csv_from_folder(
+            lst = self.s3.read_csv_folder(
                 self.good_data_train_dir,
                 self.train_data_bucket,
                 self.train_db_insert_log,
@@ -98,7 +98,7 @@ class DB_Operation_Train:
                 self.train_db_insert_log,
             )
 
-    def export_collection_to_csv(self, good_data_db_name, good_data_collection_name):
+    def export_collection_csv(self, good_data_db_name, good_data_collection_name):
         """
         Method Name :   insert_good_data_as_record
         Description :   This method inserts the good data in MongoDB as collection
@@ -109,7 +109,7 @@ class DB_Operation_Train:
         Version     :   1.2
         Revisions   :   moved setup to cloud
         """
-        method_name = self.export_collection_to_csv.__name__
+        method_name = self.export_collection_csv.__name__
 
         self.log_writer.start_log(
             "start",

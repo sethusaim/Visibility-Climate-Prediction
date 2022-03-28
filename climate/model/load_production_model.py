@@ -112,9 +112,9 @@ class Load_Prod_Model:
 
             self.mlflow_op.set_mlflow_tracking_uri()
 
-            exp = self.mlflow_op.get_experiment_from_mlflow(exp_name=self.exp_name)
+            exp = self.mlflow_op.get_experiment_mlflow(exp_name=self.exp_name)
 
-            runs = self.mlflow_op.get_runs_from_mlflow(exp_id=exp.experiment_id)
+            runs = self.mlflow_op.get_runs_mlflow(exp_id=exp.experiment_id)
 
             """
             Code Explaination: 
@@ -146,7 +146,7 @@ class Load_Prod_Model:
                 "Sorted the runs cols in descending order",
             )
 
-            metrics_dict = runs_cols.to_dict()
+            metrics_dict = runs_cols.dict()
 
             self.log_writer.log(
                 self.load_prod_model_log,

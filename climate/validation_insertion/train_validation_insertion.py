@@ -15,7 +15,7 @@ class Train_Validation:
     """
 
     def __init__(self, bucket):
-        self.raw_data = Raw_Train_Data_Validation(raw_data_bucket)
+        self.raw_data = Raw_Train_Data_Validation(bucket)
 
         self.data_transform = Data_Transform_Train()
 
@@ -61,7 +61,7 @@ class Train_Validation:
                 LengthOfTimeStampInFile,
                 column_names,
                 noofcolumns,
-            ) = self.raw_data.values_from_schema()
+            ) = self.raw_data.values_schema()
 
             regex = self.raw_data.get_regex_pattern()
 
@@ -83,7 +83,7 @@ class Train_Validation:
                 "Starting Data Transformation",
             )
 
-            self.data_transform.add_quotes_to_string()
+            self.data_transform.add_quotes_string()
 
             self.log_writer.log(
                 self.train_main_log,
@@ -100,7 +100,7 @@ class Train_Validation:
                 "Data type validation Operation completed !!",
             )
 
-            self.db_operation.export_collection_to_csv(
+            self.db_operation.export_collection_csv(
                 db_name=self.good_data_db_name,
                 collection_name=self.good_data_collection_name,
             )

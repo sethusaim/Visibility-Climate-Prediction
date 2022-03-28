@@ -139,13 +139,13 @@ class MongoDB_Operation:
         )
 
         try:
-            database = self.get_database(db_name=db_name, log_file)
+            database = self.get_database(db_name, log_file)
 
             collection = database.get_collection(name=collection_name)
 
             df = pd.DataFrame(list(collection.find()))
 
-            if "_id" in df.columns.to_list():
+            if "_id" in df.columns.list():
                 df = df.drop(columns=["_id"], axis=1)
 
             self.log_writer.log(
@@ -193,7 +193,7 @@ class MongoDB_Operation:
         )
 
         try:
-            records = json.loads(data_frame.T.to_json()).values()
+            records = json.loads(data_frame.T.json()).values()
 
             self.log_writer.log(
                 log_file,
@@ -204,15 +204,11 @@ class MongoDB_Operation:
 
             collection = database.get_collection(collection_name)
 
-            self.log_writer.log(
-                log_file, "Inserting records to MongoDB"
-            )
+            self.log_writer.log(log_file, "Inserting records to MongoDB")
 
             collection.insert_many(records)
 
-            self.log_writer.log(
-                log_file, "Inserted records to MongoDB"
-            )
+            self.log_writer.log(log_file, "Inserted records to MongoDB")
 
             self.log_writer.start_log(
                 "exit",

@@ -1,6 +1,5 @@
 import pandas as pd
 from botocore.exceptions import ClientError
-from sklearn.neighbors import LocalOutlierFactor
 from climate.data_ingestion.data_loader_prediction import Data_Getter_Pred
 from climate.data_preprocessing.preprocessing import Preprocessor
 from climate.s3_bucket_operations.s3_operations import S3_Operation
@@ -57,9 +56,7 @@ class Prediction:
         )
 
         try:
-            self.s3.load_objectect(
-                self.input_files_bucket, object=self.pred_output_file
-            )
+            self.s3.load_object(self.input_files_bucket, self.pred_output_file)
 
             self.log_writer.log(
                 log_file,
@@ -109,10 +106,8 @@ class Prediction:
         )
 
         try:
-            list_of_files = self.s3.get_files(
-                bucket,
-                self.prod_model_dir,
-                log_file,
+            list_of_files = self.s3.get_files_from_folder(
+                self.prod_model_dir, bucket, log_file
             )
 
             for file in list_of_files:
@@ -147,15 +142,15 @@ class Prediction:
                 log_file,
             )
 
-    def predict_from_model(self):
+    def predict_model(self):
         """
-        Method Name :   predict_from_model
+        Method Name :   predict_model
         Description :   This method is used for loading from prod model dir of s3 bucket and use them for prediction
 
         Version     :   1.2
         Revisions   :   moved setup to cloud
         """
-        method_name = self.predict_from_model.__name__
+        method_name = self.predict_model.__name__
 
         self.log_writer.start_log(
             "start",
@@ -174,9 +169,9 @@ class Prediction:
             if is_null_present:
                 data = self.preprocessor.impute_missing_values(data)
 
-            cols_to_drop = self.preprocessor.get_columns_with_zero_std_deviation(data)
+            cols_drop = self.preprocessor.get_columns_with_zero_std_deviation(data)
 
-            data = self.preprocessor.remove_columns(data, cols_to_drop)
+            data = self.preprocessor.remove_columns(data, cols_drop)
 
             kmeans = self.s3.load_model(self.model_bucket, "KMeans", self.pred_log)
 
@@ -229,7 +224,7 @@ class Prediction:
             return (
                 self.input_files_bucket,
                 self.pred_output_file,
-                result.head().to_json(orient="records"),
+                result.head().json(orient="records"),
             )
 
         except Exception as e:

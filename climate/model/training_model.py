@@ -1,17 +1,15 @@
-import mlflow
 from climate.data_ingestion.data_loader_train import Data_Getter_Train
 from climate.data_preprocessing.clustering import KMeans_Clustering
 from climate.data_preprocessing.preprocessing import Preprocessor
 from climate.mlflow_utils.mlflow_operations import MLFlow_Operation
 from climate.model_finder.tuner import Model_Finder
 from climate.s3_bucket_operations.s3_operations import S3_Operation
-from sklearn.model_selection import train_test_split
 from utils.logger import App_Logger
 from utils.model_utils import Model_Utils
 from utils.read_params import read_params
 
 
-class train_model:
+class Train_model:
     """
     Description :   This method is used for getting the data and applying
                     some preprocessing steps and then train the models and register them in mlflow
@@ -32,14 +30,6 @@ class train_model:
         self.test_size = self.config["base"]["test_size"]
 
         self.target_col = self.config["base"]["target_col"]
-
-        self.random_state = self.config["base"]["random_state"]
-
-        self.remote_server_uri = self.config["mlflow_config"]["remote_server_uri"]
-
-        self.experiment_name = self.config["mlflow_config"]["experiment_name"]
-
-        self.run_name = self.config["mlflow_config"]["run_name"]
 
         self.train_model_dir = self.config["models_dir"]["trained"]
 
@@ -91,9 +81,9 @@ class train_model:
             if is_null_present:
                 X = self.preprocessor.impute_missing_values(X)
 
-            cols_to_drop = self.preprocessor.get_columns_with_zero_std_deviation(X)
+            cols_drop = self.preprocessor.get_columns_with_zero_std_deviation(X)
 
-            X = self.preprocessor.remove_columns(X, cols_to_drop)
+            X = self.preprocessor.remove_columns(X, cols_drop)
 
             number_of_clusters = self.kmeans_op.elbow_plot(X)
 

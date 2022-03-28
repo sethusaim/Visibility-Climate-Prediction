@@ -268,46 +268,32 @@ class Preprocessor:
                     self.cols_with_missing_values.append(self.cols[i])
 
             if self.null_present:
-                self.dataframe_with_null = pd.dataframe()
+                self.null_df = pd.DataFrame()
 
-                self.dataframe_with_null["columns"] = data.columns
+                self.null_df["columns"] = data.columns
 
-                self.dataframe_with_null["missing values count"] = np.asarray(
-                    data.isna().sum()
-                )
+                self.null_df["missing values count"] = np.asarray(data.isna().sum())
 
-            self.log_writer.log(
-                self.log_file,
-                "Created data frame with null values",
-            )
+            self.log_writer.log(self.log_file, "Created data frame with null values")
 
             self.s3.upload_df_as_csv(
-                self.dataframe_with_null,
+                self.null_df,
                 self.null_values_file,
                 self.input_files_bucket,
                 self.null_values_file,
             )
 
             self.log_writer.start_log(
-                "exit",
-                self.class_name,
-                method_name,
-                self.log_file,
+                "exit", self.class_name, method_name, self.log_file
             )
 
             return self.null_present
 
         except Exception as e:
-            self.log_writer.log(
-                self.log_file,
-                "Finding missing values failed",
-            )
+            self.log_writer.log(self.log_file, "Finding missing values failed")
 
             self.log_writer.exception_log(
-                e,
-                self.class_name,
-                method_name,
-                self.log_file,
+                e, self.class_name, method_name, self.log_file
             )
 
     def encode_target_cols(self, data):
@@ -502,12 +488,12 @@ class Preprocessor:
 
         self.data_n = data.describe()
 
-        self.col_to_drop = []
+        self.col_drop = []
 
         try:
             for x in self.columns:
                 if self.data_n[x]["std"] == 0:
-                    self.col_to_drop.append(x)
+                    self.col_drop.append(x)
 
             self.log_writer.log(
                 self.log_file,
@@ -521,7 +507,7 @@ class Preprocessor:
                 self.log_file,
             )
 
-            return self.col_to_drop
+            return self.col_drop
 
         except Exception as e:
             self.log_writer.log(
